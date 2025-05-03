@@ -1,0 +1,21 @@
+[
+    {
+      "name": "TCS",
+      "role": "Software Engineer",
+      "desc": "Backend development role.",
+      "ctc": "8 LPA",
+      "location": "Hyderabad",
+      "logo": "/images/tcs.png",
+      "applyLink": "#"
+    },
+    {
+      "name": "Infosys",
+      "role": "Frontend Developer",
+      "desc": "React UI role.",
+      "ctc": "6.5 LPA",
+      "location": "Bangalore",
+      "logo": "/images/infosys.png",
+      "applyLink": "#"
+    }
+  ]
+  

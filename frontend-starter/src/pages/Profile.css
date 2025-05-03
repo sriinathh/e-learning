@@ -1,0 +1,232 @@
+/* General Styles */
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f7fafc;
+  margin: 0;
+  padding: 0;
+}
+
+h1, h2 {
+  font-family: 'Arial', sans-serif;
+}
+
+/* Profile Page */
+.bg-base-200 {
+  background-color: #f8f9fa;
+}
+
+.max-w-3xl {
+  max-width: 768px;
+}
+
+.p-4 {
+  padding: 1rem;
+}
+
+.py-8 {
+  padding-top: 2rem;
+  padding-bottom: 2rem;
+}
+
+/* Shadowed Box */
+.bg-white {
+  background-color: #fff;
+}
+
+.shadow-lg {
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+}
+
+/* Avatar Section */
+.relative {
+  position: relative;
+}
+
+.w-32 {
+  width: 8rem;
+}
+
+.h-32 {
+  height: 8rem;
+}
+
+.rounded-full {
+  border-radius: 9999px;
+}
+
+.object-cover {
+  object-fit: cover;
+}
+
+.border-4 {
+  border-width: 4px;
+}
+
+.border-base-200 {
+  border-color: #f8f9fa;
+}
+
+.shadow-xl {
+  box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+}
+
+/* Hover Effect */
+.hover\:scale-105:hover {
+  transform: scale(1.05);
+}
+
+.transition-all {
+  transition: all 0.2s ease-in-out;
+}
+
+.cursor-pointer {
+  cursor: pointer;
+}
+
+/* Text Styling */
+.text-center {
+  text-align: center;
+}
+
+.text-gray-800 {
+  color: #2d3748;
+}
+
+.text-gray-500 {
+  color: #a0aec0;
+}
+
+.mt-2 {
+  margin-top: 0.5rem;
+}
+
+.font-semibold {
+  font-weight: 600;
+}
+
+.text-lg {
+  font-size: 1.125rem;
+}
+
+.text-sm {
+  font-size: 0.875rem;
+}
+
+.text-zinc-400 {
+  color: #cbd5e0;
+}
+
+.font-bold {
+  font-weight: 700;
+}
+
+.text-green-500 {
+  color: #38a169;
+}
+
+.bg-base-300 {
+  background-color: #e2e8f0;
+}
+
+.p-2 {
+  padding: 0.5rem;
+}
+
+.rounded-full {
+  border-radius: 9999px;
+}
+
+.text-base-200 {
+  color: #edf2f7;
+}
+
+.text-sm {
+  font-size: 0.875rem;
+}
+
+/* Account Info Section */
+.mt-6 {
+  margin-top: 1.5rem;
+}
+
+.px-4 {
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+.py-2.5 {
+  padding-top: 0.625rem;
+  padding-bottom: 0.625rem;
+}
+
+.bg-base-200 {
+  background-color: #edf2f7;
+}
+
+.rounded-lg {
+  border-radius: 0.5rem;
+}
+
+.border {
+  border-width: 1px;
+}
+
+.border-zinc-700 {
+  border-color: #2d3748;
+}
+
+.text-gray-800 {
+  color: #2d3748;
+}
+
+.mb-4 {
+  margin-bottom: 1rem;
+}
+
+.text-xl {
+  font-size: 1.25rem;
+}
+
+.font-medium {
+  font-weight: 500;
+}
+
+.space-y-6 {
+  margin-bottom: 1.5rem;
+}
+
+.flex {
+  display: flex;
+}
+
+.items-center {
+  align-items: center;
+}
+
+.justify-between {
+  justify-content: space-between;
+}
+
+.border-b {
+  border-bottom-width: 1px;
+}
+
+.border-zinc-700 {
+  border-color: #2d3748;
+}
+
+.text-green-500 {
+  color: #38a169;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .max-w-3xl {
+    max-width: 100%;
+  }
+
+  .w-32 {
+    width: 6rem;
+    height: 6rem;
+  }
+}

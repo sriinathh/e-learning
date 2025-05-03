@@ -1,0 +1,238 @@
+/* Theme Variables */
+:root {
+  /* Default theme (coffee) */
+  --primary-color: #211720;
+  --secondary-color: #865439;
+  --text-color: #333333;
+  --background-color: #f8f9fa;
+  --card-bg: #ffffff;
+  --border-color: #e2e8f0;
+  --accent-color: #38a169;
+  --hover-color: rgba(56, 161, 105, 0.1);
+}
+
+/* Light Theme */
+html[data-theme='light'] {
+  --primary-color: #4299e1;
+  --secondary-color: #63b3ed;
+  --text-color: #1a202c;
+  --background-color: #f8fafc;
+  --card-bg: #ffffff;
+  --border-color: #e2e8f0;
+  --accent-color: #3182ce;
+  --hover-color: rgba(49, 130, 206, 0.1);
+}
+
+/* Dark Theme */
+html[data-theme='dark'] {
+  --primary-color: #2d3748;
+  --secondary-color: #4a5568;
+  --text-color: #e2e8f0;
+  --background-color: #1a202c;
+  --card-bg: #2d3748;
+  --border-color: #4a5568;
+  --accent-color: #90cdf4;
+  --hover-color: rgba(144, 205, 244, 0.1);
+}
+
+/* Cupcake Theme */
+html[data-theme='cupcake'] {
+  --primary-color: #f687b3;
+  --secondary-color: #fc8181;
+  --text-color: #702459;
+  --background-color: #fffaf0;
+  --card-bg: #ffffff;
+  --border-color: #feebc8;
+  --accent-color: #d53f8c;
+  --hover-color: rgba(213, 63, 140, 0.1);
+}
+
+/* Bumblebee Theme */
+html[data-theme='bumblebee'] {
+  --primary-color: #f6e05e;
+  --secondary-color: #ecc94b;
+  --text-color: #1a202c;
+  --background-color: #fffff0;
+  --card-bg: #ffffff;
+  --border-color: #fefcbf;
+  --accent-color: #d69e2e;
+  --hover-color: rgba(214, 158, 46, 0.1);
+}
+
+/* Emerald Theme */
+html[data-theme='emerald'] {
+  --primary-color: #48bb78;
+  --secondary-color: #68d391;
+  --text-color: #276749;
+  --background-color: #f0fff4;
+  --card-bg: #ffffff;
+  --border-color: #c6f6d5;
+  --accent-color: #38a169;
+  --hover-color: rgba(56, 161, 105, 0.1);
+}
+
+/* Corporate Theme */
+html[data-theme='corporate'] {
+  --primary-color: #4a5568;
+  --secondary-color: #718096;
+  --text-color: #1a202c;
+  --background-color: #f8fafc;
+  --card-bg: #ffffff;
+  --border-color: #e2e8f0;
+  --accent-color: #3182ce;
+  --hover-color: rgba(49, 130, 206, 0.1);
+}
+
+/* Synthwave Theme */
+html[data-theme='synthwave'] {
+  --primary-color: #805ad5;
+  --secondary-color: #e779c1;
+  --text-color: #d6bcfa;
+  --background-color: #2d1b69;
+  --card-bg: #4c1d95;
+  --border-color: #6b46c1;
+  --accent-color: #e779c1;
+  --hover-color: rgba(231, 121, 193, 0.1);
+}
+
+/* Retro Theme */
+html[data-theme='retro'] {
+  --primary-color: #a7b99e;
+  --secondary-color: #c5d3bd;
+  --text-color: #5f4339;
+  --background-color: #e4d8b4;
+  --card-bg: #f1ebcd;
+  --border-color: #a7b99e;
+  --accent-color: #cb8a32;
+  --hover-color: rgba(203, 138, 50, 0.1);
+}
+
+/* Cyberpunk Theme */
+html[data-theme='cyberpunk'] {
+  --primary-color: #ff00a0;
+  --secondary-color: #7000ff;
+  --text-color: #ffffff;
+  --background-color: #000000;
+  --card-bg: #1a1a1a;
+  --border-color: #ff00a0;
+  --accent-color: #ffee00;
+  --hover-color: rgba(255, 238, 0, 0.1);
+}
+
+/* Coffee Theme */
+html[data-theme='coffee'] {
+  --primary-color: #211720;
+  --secondary-color: #865439;
+  --text-color: #4a3524;
+  --background-color: #efefef;
+  --card-bg: #ffffff;
+  --border-color: #dcd3bd;
+  --accent-color: #865439;
+  --hover-color: rgba(134, 84, 57, 0.1);
+}
+
+/* Winter Theme */
+html[data-theme='winter'] {
+  --primary-color: #2c5282;
+  --secondary-color: #2b6cb0;
+  --text-color: #1a365d;
+  --background-color: #ebf8ff;
+  --card-bg: #ffffff;
+  --border-color: #bee3f8;
+  --accent-color: #63b3ed;
+  --hover-color: rgba(99, 179, 237, 0.1);
+}
+
+/* Apply theme to app container */
+.app-container {
+  background-color: var(--background-color);
+  color: var(--text-color);
+  min-height: 100vh;
+  transition: all 0.3s ease;
+}
+
+/* Apply theme to cards */
+.card, 
+.chakra-card,
+.chakra-modal__content,
+[role="dialog"],
+.chakra-menu__content {
+  background-color: var(--card-bg) !important;
+  border-color: var(--border-color) !important;
+}
+
+/* Apply theme to buttons */
+.chakra-button {
+  background-color: var(--primary-color);
+  color: white;
+}
+
+.chakra-button:hover {
+  background-color: var(--secondary-color);
+}
+
+/* Override for outline buttons */
+.chakra-button[data-variant="outline"] {
+  background-color: transparent;
+  color: var(--primary-color);
+  border-color: var(--primary-color);
+}
+
+.chakra-button[data-variant="outline"]:hover {
+  background-color: var(--hover-color);
+}
+
+/* Apply theme to inputs */
+.chakra-input,
+.chakra-textarea,
+.chakra-select__wrapper {
+  background-color: var(--card-bg);
+  border-color: var(--border-color);
+  color: var(--text-color);
+}
+
+/* Apply theme to headings */
+h1, h2, h3, h4, h5, h6,
+.chakra-heading {
+  color: var(--text-color);
+}
+
+/* Apply theme to tabs */
+.chakra-tabs__tab {
+  color: var(--text-color);
+}
+
+.chakra-tabs__tab[aria-selected="true"] {
+  color: var(--accent-color);
+  border-color: var(--accent-color);
+}
+
+/* Apply theme to progress bars */
+.chakra-progress__track {
+  background-color: var(--border-color);
+}
+
+.chakra-progress__bar {
+  background-color: var(--accent-color);
+}
+
+/* Apply theme to links */
+a, .chakra-link {
+  color: var(--accent-color);
+}
+
+a:hover, .chakra-link:hover {
+  text-decoration: underline;
+}
+
+/* Apply theme to navbar */
+nav, .navbar, header {
+  background-color: var(--primary-color);
+  color: white;
+}
+
+/* Apply theme to sidebar */
+.sidebar {
+  background-color: var(--card-bg);
+  border-color: var(--border-color);
+} 

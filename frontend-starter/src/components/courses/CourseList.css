@@ -1,0 +1,1356 @@
+import React, { useState } from "react";
+import SidebarNav from "./SidebarNav"; // SidebarNav component
+import "./CoursePage.css"; // Import the CSS
+
+// Example course list with manually added courses
+const coursesList = [
+  
+    {
+      "id": 1,
+      "name": "Course 1",
+      "logo": "https://cdn-icons-png.flaticon.com/512/2721/2721295.png",
+      "description": "This is a dummy description for a sample course on a tech topic. Learn the basics and explore key concepts.",
+      "notes": "https://example.com/course1.pdf",
+      "quiz": [
+        {
+          "question": "What is the main purpose of this course?",
+          "options": [
+            "Learn basics",
+            "Advanced topics",
+            "None",
+            "All"
+          ],
+          "answer": "Learn basics"
+        },
+        {
+          "question": "What does HTML stand for?",
+          "options": [
+            "Hyper Trainer Marking Language",
+            "HyperText Markup Language",
+            "HyperText Markdown Language",
+            "None of the above"
+          ],
+          "answer": "HyperText Markup Language"
+        },
+        {
+          "question": "Which one is a frontend language?",
+          "options": [
+            "Python",
+            "Java",
+            "HTML",
+            "Node.js"
+          ],
+          "answer": "HTML"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "name": "Course 2",
+      "logo": "https://cdn-icons-png.flaticon.com/512/2721/2721295.png",
+      "description": "This is a dummy description for a sample course on a tech topic. Learn the basics and explore key concepts.",
+      "notes": "https://example.com/course2.pdf",
+      "quiz": [
+        {
+          "question": "What is the main purpose of this course?",
+          "options": [
+            "Learn basics",
+            "Advanced topics",
+            "None",
+            "All"
+          ],
+          "answer": "Learn basics"
+        },
+        {
+          "question": "What does HTML stand for?",
+          "options": [
+            "Hyper Trainer Marking Language",
+            "HyperText Markup Language",
+            "HyperText Markdown Language",
+            "None of the above"
+          ],
+          "answer": "HyperText Markup Language"
+        },
+        {
+          "question": "Which one is a frontend language?",
+          "options": [
+            "Python",
+            "Java",
+            "HTML",
+            "Node.js"
+          ],
+          "answer": "HTML"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "name": "Course 3",
+      "logo": "https://cdn-icons-png.flaticon.com/512/2721/2721295.png",
+      "description": "This is a dummy description for a sample course on a tech topic. Learn the basics and explore key concepts.",
+      "notes": "https://example.com/course3.pdf",
+      "quiz": [
+        {
+          "question": "What is the main purpose of this course?",
+          "options": [
+            "Learn basics",
+            "Advanced topics",
+            "None",
+            "All"
+          ],
+          "answer": "Learn basics"
+        },
+        {
+          "question": "What does HTML stand for?",
+          "options": [
+            "Hyper Trainer Marking Language",
+            "HyperText Markup Language",
+            "HyperText Markdown Language",
+            "None of the above"
+          ],
+          "answer": "HyperText Markup Language"
+        },
+        {
+          "question": "Which one is a frontend language?",
+          "options": [
+            "Python",
+            "Java",
+            "HTML",
+            "Node.js"
+          ],
+          "answer": "HTML"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "name": "Course 4",
+      "logo": "https://cdn-icons-png.flaticon.com/512/2721/2721295.png",
+      "description": "This is a dummy description for a sample course on a tech topic. Learn the basics and explore key concepts.",
+      "notes": "https://example.com/course4.pdf",
+      "quiz": [
+        {
+          "question": "What is the main purpose of this course?",
+          "options": [
+            "Learn basics",
+            "Advanced topics",
+            "None",
+            "All"
+          ],
+          "answer": "Learn basics"
+        },
+        {
+          "question": "What does HTML stand for?",
+          "options": [
+            "Hyper Trainer Marking Language",
+            "HyperText Markup Language",
+            "HyperText Markdown Language",
+            "None of the above"
+          ],
+          "answer": "HyperText Markup Language"
+        },
+        {
+          "question": "Which one is a frontend language?",
+          "options": [
+            "Python",
+            "Java",
+            "HTML",
+            "Node.js"
+          ],
+          "answer": "HTML"
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "name": "Course 5",
+      "logo": "https://cdn-icons-png.flaticon.com/512/2721/2721295.png",
+      "description": "This is a dummy description for a sample course on a tech topic. Learn the basics and explore key concepts.",
+      "notes": "https://example.com/course5.pdf",
+      "quiz": [
+        {
+          "question": "What is the main purpose of this course?",
+          "options": [
+            "Learn basics",
+            "Advanced topics",
+            "None",
+            "All"
+          ],
+          "answer": "Learn basics"
+        },
+        {
+          "question": "What does HTML stand for?",
+          "options": [
+            "Hyper Trainer Marking Language",
+            "HyperText Markup Language",
+            "HyperText Markdown Language",
+            "None of the above"
+          ],
+          "answer": "HyperText Markup Language"
+        },
+        {
+          "question": "Which one is a frontend language?",
+          "options": [
+            "Python",
+            "Java",
+            "HTML",
+            "Node.js"
+          ],
+          "answer": "HTML"
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "name": "Course 6",
+      "logo": "https://cdn-icons-png.flaticon.com/512/2721/2721295.png",
+      "description": "This is a dummy description for a sample course on a tech topic. Learn the basics and explore key concepts.",
+      "notes": "https://example.com/course6.pdf",
+      "quiz": [
+        {
+          "question": "What is the main purpose of this course?",
+          "options": [
+            "Learn basics",
+            "Advanced topics",
+            "None",
+            "All"
+          ],
+          "answer": "Learn basics"
+        },
+        {
+          "question": "What does HTML stand for?",
+          "options": [
+            "Hyper Trainer Marking Language",
+            "HyperText Markup Language",
+            "HyperText Markdown Language",
+            "None of the above"
+          ],
+          "answer": "HyperText Markup Language"
+        },
+        {
+          "question": "Which one is a frontend language?",
+          "options": [
+            "Python",
+            "Java",
+            "HTML",
+            "Node.js"
+          ],
+          "answer": "HTML"
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "name": "Course 7",
+      "logo": "https://cdn-icons-png.flaticon.com/512/2721/2721295.png",
+      "description": "This is a dummy description for a sample course on a tech topic. Learn the basics and explore key concepts.",
+      "notes": "https://example.com/course7.pdf",
+      "quiz": [
+        {
+          "question": "What is the main purpose of this course?",
+          "options": [
+            "Learn basics",
+            "Advanced topics",
+            "None",
+            "All"
+          ],
+          "answer": "Learn basics"
+        },
+        {
+          "question": "What does HTML stand for?",
+          "options": [
+            "Hyper Trainer Marking Language",
+            "HyperText Markup Language",
+            "HyperText Markdown Language",
+            "None of the above"
+          ],
+          "answer": "HyperText Markup Language"
+        },
+        {
+          "question": "Which one is a frontend language?",
+          "options": [
+            "Python",
+            "Java",
+            "HTML",
+            "Node.js"
+          ],
+          "answer": "HTML"
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "name": "Course 8",
+      "logo": "https://cdn-icons-png.flaticon.com/512/2721/2721295.png",
+      "description": "This is a dummy description for a sample course on a tech topic. Learn the basics and explore key concepts.",
+      "notes": "https://example.com/course8.pdf",
+      "quiz": [
+        {
+          "question": "What is the main purpose of this course?",
+          "options": [
+            "Learn basics",
+            "Advanced topics",
+            "None",
+            "All"
+          ],
+          "answer": "Learn basics"
+        },
+        {
+          "question": "What does HTML stand for?",
+          "options": [
+            "Hyper Trainer Marking Language",
+            "HyperText Markup Language",
+            "HyperText Markdown Language",
+            "None of the above"
+          ],
+          "answer": "HyperText Markup Language"
+        },
+        {
+          "question": "Which one is a frontend language?",
+          "options": [
+            "Python",
+            "Java",
+            "HTML",
+            "Node.js"
+          ],
+          "answer": "HTML"
+        }
+      ]
+    },
+    {
+      "id": 9,
+      "name": "Course 9",
+      "logo": "https://cdn-icons-png.flaticon.com/512/2721/2721295.png",
+      "description": "This is a dummy description for a sample course on a tech topic. Learn the basics and explore key concepts.",
+      "notes": "https://example.com/course9.pdf",
+      "quiz": [
+        {
+          "question": "What is the main purpose of this course?",
+          "options": [
+            "Learn basics",
+            "Advanced topics",
+            "None",
+            "All"
+          ],
+          "answer": "Learn basics"
+        },
+        {
+          "question": "What does HTML stand for?",
+          "options": [
+            "Hyper Trainer Marking Language",
+            "HyperText Markup Language",
+            "HyperText Markdown Language",
+            "None of the above"
+          ],
+          "answer": "HyperText Markup Language"
+        },
+        {
+          "question": "Which one is a frontend language?",
+          "options": [
+            "Python",
+            "Java",
+            "HTML",
+            "Node.js"
+          ],
+          "answer": "HTML"
+        }
+      ]
+    },
+    {
+      "id": 10,
+      "name": "Course 10",
+      "logo": "https://cdn-icons-png.flaticon.com/512/2721/2721295.png",
+      "description": "This is a dummy description for a sample course on a tech topic. Learn the basics and explore key concepts.",
+      "notes": "https://example.com/course10.pdf",
+      "quiz": [
+        {
+          "question": "What is the main purpose of this course?",
+          "options": [
+            "Learn basics",
+            "Advanced topics",
+            "None",
+            "All"
+          ],
+          "answer": "Learn basics"
+        },
+        {
+          "question": "What does HTML stand for?",
+          "options": [
+            "Hyper Trainer Marking Language",
+            "HyperText Markup Language",
+            "HyperText Markdown Language",
+            "None of the above"
+          ],
+          "answer": "HyperText Markup Language"
+        },
+        {
+          "question": "Which one is a frontend language?",
+          "options": [
+            "Python",
+            "Java",
+            "HTML",
+            "Node.js"
+          ],
+          "answer": "HTML"
+        }
+      ]
+    },
+    {
+      "id": 11,
+      "name": "Course 11",
+      "logo": "https://cdn-icons-png.flaticon.com/512/2721/2721295.png",
+      "description": "This is a dummy description for a sample course on a tech topic. Learn the basics and explore key concepts.",
+      "notes": "https://example.com/course11.pdf",
+      "quiz": [
+        {
+          "question": "What is the main purpose of this course?",
+          "options": [
+            "Learn basics",
+            "Advanced topics",
+            "None",
+            "All"
+          ],
+          "answer": "Learn basics"
+        },
+        {
+          "question": "What does HTML stand for?",
+          "options": [
+            "Hyper Trainer Marking Language",
+            "HyperText Markup Language",
+            "HyperText Markdown Language",
+            "None of the above"
+          ],
+          "answer": "HyperText Markup Language"
+        },
+        {
+          "question": "Which one is a frontend language?",
+          "options": [
+            "Python",
+            "Java",
+            "HTML",
+            "Node.js"
+          ],
+          "answer": "HTML"
+        }
+      ]
+    },
+    {
+      "id": 12,
+      "name": "Course 12",
+      "logo": "https://cdn-icons-png.flaticon.com/512/2721/2721295.png",
+      "description": "This is a dummy description for a sample course on a tech topic. Learn the basics and explore key concepts.",
+      "notes": "https://example.com/course12.pdf",
+      "quiz": [
+        {
+          "question": "What is the main purpose of this course?",
+          "options": [
+            "Learn basics",
+            "Advanced topics",
+            "None",
+            "All"
+          ],
+          "answer": "Learn basics"
+        },
+        {
+          "question": "What does HTML stand for?",
+          "options": [
+            "Hyper Trainer Marking Language",
+            "HyperText Markup Language",
+            "HyperText Markdown Language",
+            "None of the above"
+          ],
+          "answer": "HyperText Markup Language"
+        },
+        {
+          "question": "Which one is a frontend language?",
+          "options": [
+            "Python",
+            "Java",
+            "HTML",
+            "Node.js"
+          ],
+          "answer": "HTML"
+        }
+      ]
+    },
+    {
+      "id": 13,
+      "name": "Course 13",
+      "logo": "https://cdn-icons-png.flaticon.com/512/2721/2721295.png",
+      "description": "This is a dummy description for a sample course on a tech topic. Learn the basics and explore key concepts.",
+      "notes": "https://example.com/course13.pdf",
+      "quiz": [
+        {
+          "question": "What is the main purpose of this course?",
+          "options": [
+            "Learn basics",
+            "Advanced topics",
+            "None",
+            "All"
+          ],
+          "answer": "Learn basics"
+        },
+        {
+          "question": "What does HTML stand for?",
+          "options": [
+            "Hyper Trainer Marking Language",
+            "HyperText Markup Language",
+            "HyperText Markdown Language",
+            "None of the above"
+          ],
+          "answer": "HyperText Markup Language"
+        },
+        {
+          "question": "Which one is a frontend language?",
+          "options": [
+            "Python",
+            "Java",
+            "HTML",
+            "Node.js"
+          ],
+          "answer": "HTML"
+        }
+      ]
+    },
+    {
+      "id": 14,
+      "name": "Course 14",
+      "logo": "https://cdn-icons-png.flaticon.com/512/2721/2721295.png",
+      "description": "This is a dummy description for a sample course on a tech topic. Learn the basics and explore key concepts.",
+      "notes": "https://example.com/course14.pdf",
+      "quiz": [
+        {
+          "question": "What is the main purpose of this course?",
+          "options": [
+            "Learn basics",
+            "Advanced topics",
+            "None",
+            "All"
+          ],
+          "answer": "Learn basics"
+        },
+        {
+          "question": "What does HTML stand for?",
+          "options": [
+            "Hyper Trainer Marking Language",
+            "HyperText Markup Language",
+            "HyperText Markdown Language",
+            "None of the above"
+          ],
+          "answer": "HyperText Markup Language"
+        },
+        {
+          "question": "Which one is a frontend language?",
+          "options": [
+            "Python",
+            "Java",
+            "HTML",
+            "Node.js"
+          ],
+          "answer": "HTML"
+        }
+      ]
+    },
+    {
+      "id": 15,
+      "name": "Course 15",
+      "logo": "https://cdn-icons-png.flaticon.com/512/2721/2721295.png",
+      "description": "This is a dummy description for a sample course on a tech topic. Learn the basics and explore key concepts.",
+      "notes": "https://example.com/course15.pdf",
+      "quiz": [
+        {
+          "question": "What is the main purpose of this course?",
+          "options": [
+            "Learn basics",
+            "Advanced topics",
+            "None",
+            "All"
+          ],
+          "answer": "Learn basics"
+        },
+        {
+          "question": "What does HTML stand for?",
+          "options": [
+            "Hyper Trainer Marking Language",
+            "HyperText Markup Language",
+            "HyperText Markdown Language",
+            "None of the above"
+          ],
+          "answer": "HyperText Markup Language"
+        },
+        {
+          "question": "Which one is a frontend language?",
+          "options": [
+            "Python",
+            "Java",
+            "HTML",
+            "Node.js"
+          ],
+          "answer": "HTML"
+        }
+      ]
+    },
+    {
+      "id": 16,
+      "name": "Course 16",
+      "logo": "https://cdn-icons-png.flaticon.com/512/2721/2721295.png",
+      "description": "This is a dummy description for a sample course on a tech topic. Learn the basics and explore key concepts.",
+      "notes": "https://example.com/course16.pdf",
+      "quiz": [
+        {
+          "question": "What is the main purpose of this course?",
+          "options": [
+            "Learn basics",
+            "Advanced topics",
+            "None",
+            "All"
+          ],
+          "answer": "Learn basics"
+        },
+        {
+          "question": "What does HTML stand for?",
+          "options": [
+            "Hyper Trainer Marking Language",
+            "HyperText Markup Language",
+            "HyperText Markdown Language",
+            "None of the above"
+          ],
+          "answer": "HyperText Markup Language"
+        },
+        {
+          "question": "Which one is a frontend language?",
+          "options": [
+            "Python",
+            "Java",
+            "HTML",
+            "Node.js"
+          ],
+          "answer": "HTML"
+        }
+      ]
+    },
+    {
+      "id": 17,
+      "name": "Course 17",
+      "logo": "https://cdn-icons-png.flaticon.com/512/2721/2721295.png",
+      "description": "This is a dummy description for a sample course on a tech topic. Learn the basics and explore key concepts.",
+      "notes": "https://example.com/course17.pdf",
+      "quiz": [
+        {
+          "question": "What is the main purpose of this course?",
+          "options": [
+            "Learn basics",
+            "Advanced topics",
+            "None",
+            "All"
+          ],
+          "answer": "Learn basics"
+        },
+        {
+          "question": "What does HTML stand for?",
+          "options": [
+            "Hyper Trainer Marking Language",
+            "HyperText Markup Language",
+            "HyperText Markdown Language",
+            "None of the above"
+          ],
+          "answer": "HyperText Markup Language"
+        },
+        {
+          "question": "Which one is a frontend language?",
+          "options": [
+            "Python",
+            "Java",
+            "HTML",
+            "Node.js"
+          ],
+          "answer": "HTML"
+        }
+      ]
+    },
+    {
+      "id": 18,
+      "name": "Course 18",
+      "logo": "https://cdn-icons-png.flaticon.com/512/2721/2721295.png",
+      "description": "This is a dummy description for a sample course on a tech topic. Learn the basics and explore key concepts.",
+      "notes": "https://example.com/course18.pdf",
+      "quiz": [
+        {
+          "question": "What is the main purpose of this course?",
+          "options": [
+            "Learn basics",
+            "Advanced topics",
+            "None",
+            "All"
+          ],
+          "answer": "Learn basics"
+        },
+        {
+          "question": "What does HTML stand for?",
+          "options": [
+            "Hyper Trainer Marking Language",
+            "HyperText Markup Language",
+            "HyperText Markdown Language",
+            "None of the above"
+          ],
+          "answer": "HyperText Markup Language"
+        },
+        {
+          "question": "Which one is a frontend language?",
+          "options": [
+            "Python",
+            "Java",
+            "HTML",
+            "Node.js"
+          ],
+          "answer": "HTML"
+        }
+      ]
+    },
+    {
+      "id": 19,
+      "name": "Course 19",
+      "logo": "https://cdn-icons-png.flaticon.com/512/2721/2721295.png",
+      "description": "This is a dummy description for a sample course on a tech topic. Learn the basics and explore key concepts.",
+      "notes": "https://example.com/course19.pdf",
+      "quiz": [
+        {
+          "question": "What is the main purpose of this course?",
+          "options": [
+            "Learn basics",
+            "Advanced topics",
+            "None",
+            "All"
+          ],
+          "answer": "Learn basics"
+        },
+        {
+          "question": "What does HTML stand for?",
+          "options": [
+            "Hyper Trainer Marking Language",
+            "HyperText Markup Language",
+            "HyperText Markdown Language",
+            "None of the above"
+          ],
+          "answer": "HyperText Markup Language"
+        },
+        {
+          "question": "Which one is a frontend language?",
+          "options": [
+            "Python",
+            "Java",
+            "HTML",
+            "Node.js"
+          ],
+          "answer": "HTML"
+        }
+      ]
+    },
+    {
+      "id": 20,
+      "name": "Course 20",
+      "logo": "https://cdn-icons-png.flaticon.com/512/2721/2721295.png",
+      "description": "This is a dummy description for a sample course on a tech topic. Learn the basics and explore key concepts.",
+      "notes": "https://example.com/course20.pdf",
+      "quiz": [
+        {
+          "question": "What is the main purpose of this course?",
+          "options": [
+            "Learn basics",
+            "Advanced topics",
+            "None",
+            "All"
+          ],
+          "answer": "Learn basics"
+        },
+        {
+          "question": "What does HTML stand for?",
+          "options": [
+            "Hyper Trainer Marking Language",
+            "HyperText Markup Language",
+            "HyperText Markdown Language",
+            "None of the above"
+          ],
+          "answer": "HyperText Markup Language"
+        },
+        {
+          "question": "Which one is a frontend language?",
+          "options": [
+            "Python",
+            "Java",
+            "HTML",
+            "Node.js"
+          ],
+          "answer": "HTML"
+        }
+      ]
+    },
+    {
+      "id": 21,
+      "name": "Course 21",
+      "logo": "https://cdn-icons-png.flaticon.com/512/2721/2721295.png",
+      "description": "This is a dummy description for a sample course on a tech topic. Learn the basics and explore key concepts.",
+      "notes": "https://example.com/course21.pdf",
+      "quiz": [
+        {
+          "question": "What is the main purpose of this course?",
+          "options": [
+            "Learn basics",
+            "Advanced topics",
+            "None",
+            "All"
+          ],
+          "answer": "Learn basics"
+        },
+        {
+          "question": "What does HTML stand for?",
+          "options": [
+            "Hyper Trainer Marking Language",
+            "HyperText Markup Language",
+            "HyperText Markdown Language",
+            "None of the above"
+          ],
+          "answer": "HyperText Markup Language"
+        },
+        {
+          "question": "Which one is a frontend language?",
+          "options": [
+            "Python",
+            "Java",
+            "HTML",
+            "Node.js"
+          ],
+          "answer": "HTML"
+        }
+      ]
+    },
+    {
+      "id": 22,
+      "name": "Course 22",
+      "logo": "https://cdn-icons-png.flaticon.com/512/2721/2721295.png",
+      "description": "This is a dummy description for a sample course on a tech topic. Learn the basics and explore key concepts.",
+      "notes": "https://example.com/course22.pdf",
+      "quiz": [
+        {
+          "question": "What is the main purpose of this course?",
+          "options": [
+            "Learn basics",
+            "Advanced topics",
+            "None",
+            "All"
+          ],
+          "answer": "Learn basics"
+        },
+        {
+          "question": "What does HTML stand for?",
+          "options": [
+            "Hyper Trainer Marking Language",
+            "HyperText Markup Language",
+            "HyperText Markdown Language",
+            "None of the above"
+          ],
+          "answer": "HyperText Markup Language"
+        },
+        {
+          "question": "Which one is a frontend language?",
+          "options": [
+            "Python",
+            "Java",
+            "HTML",
+            "Node.js"
+          ],
+          "answer": "HTML"
+        }
+      ]
+    },
+    {
+      "id": 23,
+      "name": "Course 23",
+      "logo": "https://cdn-icons-png.flaticon.com/512/2721/2721295.png",
+      "description": "This is a dummy description for a sample course on a tech topic. Learn the basics and explore key concepts.",
+      "notes": "https://example.com/course23.pdf",
+      "quiz": [
+        {
+          "question": "What is the main purpose of this course?",
+          "options": [
+            "Learn basics",
+            "Advanced topics",
+            "None",
+            "All"
+          ],
+          "answer": "Learn basics"
+        },
+        {
+          "question": "What does HTML stand for?",
+          "options": [
+            "Hyper Trainer Marking Language",
+            "HyperText Markup Language",
+            "HyperText Markdown Language",
+            "None of the above"
+          ],
+          "answer": "HyperText Markup Language"
+        },
+        {
+          "question": "Which one is a frontend language?",
+          "options": [
+            "Python",
+            "Java",
+            "HTML",
+            "Node.js"
+          ],
+          "answer": "HTML"
+        }
+      ]
+    },
+    {
+      "id": 24,
+      "name": "Course 24",
+      "logo": "https://cdn-icons-png.flaticon.com/512/2721/2721295.png",
+      "description": "This is a dummy description for a sample course on a tech topic. Learn the basics and explore key concepts.",
+      "notes": "https://example.com/course24.pdf",
+      "quiz": [
+        {
+          "question": "What is the main purpose of this course?",
+          "options": [
+            "Learn basics",
+            "Advanced topics",
+            "None",
+            "All"
+          ],
+          "answer": "Learn basics"
+        },
+        {
+          "question": "What does HTML stand for?",
+          "options": [
+            "Hyper Trainer Marking Language",
+            "HyperText Markup Language",
+            "HyperText Markdown Language",
+            "None of the above"
+          ],
+          "answer": "HyperText Markup Language"
+        },
+        {
+          "question": "Which one is a frontend language?",
+          "options": [
+            "Python",
+            "Java",
+            "HTML",
+            "Node.js"
+          ],
+          "answer": "HTML"
+        }
+      ]
+    },
+    {
+      "id": 25,
+      "name": "Course 25",
+      "logo": "https://cdn-icons-png.flaticon.com/512/2721/2721295.png",
+      "description": "This is a dummy description for a sample course on a tech topic. Learn the basics and explore key concepts.",
+      "notes": "https://example.com/course25.pdf",
+      "quiz": [
+        {
+          "question": "What is the main purpose of this course?",
+          "options": [
+            "Learn basics",
+            "Advanced topics",
+            "None",
+            "All"
+          ],
+          "answer": "Learn basics"
+        },
+        {
+          "question": "What does HTML stand for?",
+          "options": [
+            "Hyper Trainer Marking Language",
+            "HyperText Markup Language",
+            "HyperText Markdown Language",
+            "None of the above"
+          ],
+          "answer": "HyperText Markup Language"
+        },
+        {
+          "question": "Which one is a frontend language?",
+          "options": [
+            "Python",
+            "Java",
+            "HTML",
+            "Node.js"
+          ],
+          "answer": "HTML"
+        }
+      ]
+    },
+    {
+      "id": 26,
+      "name": "Course 26",
+      "logo": "https://cdn-icons-png.flaticon.com/512/2721/2721295.png",
+      "description": "This is a dummy description for a sample course on a tech topic. Learn the basics and explore key concepts.",
+      "notes": "https://example.com/course26.pdf",
+      "quiz": [
+        {
+          "question": "What is the main purpose of this course?",
+          "options": [
+            "Learn basics",
+            "Advanced topics",
+            "None",
+            "All"
+          ],
+          "answer": "Learn basics"
+        },
+        {
+          "question": "What does HTML stand for?",
+          "options": [
+            "Hyper Trainer Marking Language",
+            "HyperText Markup Language",
+            "HyperText Markdown Language",
+            "None of the above"
+          ],
+          "answer": "HyperText Markup Language"
+        },
+        {
+          "question": "Which one is a frontend language?",
+          "options": [
+            "Python",
+            "Java",
+            "HTML",
+            "Node.js"
+          ],
+          "answer": "HTML"
+        }
+      ]
+    },
+    {
+      "id": 27,
+      "name": "Course 27",
+      "logo": "https://cdn-icons-png.flaticon.com/512/2721/2721295.png",
+      "description": "This is a dummy description for a sample course on a tech topic. Learn the basics and explore key concepts.",
+      "notes": "https://example.com/course27.pdf",
+      "quiz": [
+        {
+          "question": "What is the main purpose of this course?",
+          "options": [
+            "Learn basics",
+            "Advanced topics",
+            "None",
+            "All"
+          ],
+          "answer": "Learn basics"
+        },
+        {
+          "question": "What does HTML stand for?",
+          "options": [
+            "Hyper Trainer Marking Language",
+            "HyperText Markup Language",
+            "HyperText Markdown Language",
+            "None of the above"
+          ],
+          "answer": "HyperText Markup Language"
+        },
+        {
+          "question": "Which one is a frontend language?",
+          "options": [
+            "Python",
+            "Java",
+            "HTML",
+            "Node.js"
+          ],
+          "answer": "HTML"
+        }
+      ]
+    },
+    {
+      "id": 28,
+      "name": "Course 28",
+      "logo": "https://cdn-icons-png.flaticon.com/512/2721/2721295.png",
+      "description": "This is a dummy description for a sample course on a tech topic. Learn the basics and explore key concepts.",
+      "notes": "https://example.com/course28.pdf",
+      "quiz": [
+        {
+          "question": "What is the main purpose of this course?",
+          "options": [
+            "Learn basics",
+            "Advanced topics",
+            "None",
+            "All"
+          ],
+          "answer": "Learn basics"
+        },
+        {
+          "question": "What does HTML stand for?",
+          "options": [
+            "Hyper Trainer Marking Language",
+            "HyperText Markup Language",
+            "HyperText Markdown Language",
+            "None of the above"
+          ],
+          "answer": "HyperText Markup Language"
+        },
+        {
+          "question": "Which one is a frontend language?",
+          "options": [
+            "Python",
+            "Java",
+            "HTML",
+            "Node.js"
+          ],
+          "answer": "HTML"
+        }
+      ]
+    },
+    {
+      "id": 29,
+      "name": "Course 29",
+      "logo": "https://cdn-icons-png.flaticon.com/512/2721/2721295.png",
+      "description": "This is a dummy description for a sample course on a tech topic. Learn the basics and explore key concepts.",
+      "notes": "https://example.com/course29.pdf",
+      "quiz": [
+        {
+          "question": "What is the main purpose of this course?",
+          "options": [
+            "Learn basics",
+            "Advanced topics",
+            "None",
+            "All"
+          ],
+          "answer": "Learn basics"
+        },
+        {
+          "question": "What does HTML stand for?",
+          "options": [
+            "Hyper Trainer Marking Language",
+            "HyperText Markup Language",
+            "HyperText Markdown Language",
+            "None of the above"
+          ],
+          "answer": "HyperText Markup Language"
+        },
+        {
+          "question": "Which one is a frontend language?",
+          "options": [
+            "Python",
+            "Java",
+            "HTML",
+            "Node.js"
+          ],
+          "answer": "HTML"
+        }
+      ]
+    },
+    {
+      "id": 30,
+      "name": "Course 30",
+      "logo": "https://cdn-icons-png.flaticon.com/512/2721/2721295.png",
+      "description": "This is a dummy description for a sample course on a tech topic. Learn the basics and explore key concepts.",
+      "notes": "https://example.com/course30.pdf",
+      "quiz": [
+        {
+          "question": "What is the main purpose of this course?",
+          "options": [
+            "Learn basics",
+            "Advanced topics",
+            "None",
+            "All"
+          ],
+          "answer": "Learn basics"
+        },
+        {
+          "question": "What does HTML stand for?",
+          "options": [
+            "Hyper Trainer Marking Language",
+            "HyperText Markup Language",
+            "HyperText Markdown Language",
+            "None of the above"
+          ],
+          "answer": "HyperText Markup Language"
+        },
+        {
+          "question": "Which one is a frontend language?",
+          "options": [
+            "Python",
+            "Java",
+            "HTML",
+            "Node.js"
+          ],
+          "answer": "HTML"
+        }
+      ]
+    },
+    {
+      "id": 31,
+      "name": "Course 31",
+      "logo": "https://cdn-icons-png.flaticon.com/512/2721/2721295.png",
+      "description": "This is a dummy description for a sample course on a tech topic. Learn the basics and explore key concepts.",
+      "notes": "https://example.com/course31.pdf",
+      "quiz": [
+        {
+          "question": "What is the main purpose of this course?",
+          "options": [
+            "Learn basics",
+            "Advanced topics",
+            "None",
+            "All"
+          ],
+          "answer": "Learn basics"
+        },
+        {
+          "question": "What does HTML stand for?",
+          "options": [
+            "Hyper Trainer Marking Language",
+            "HyperText Markup Language",
+            "HyperText Markdown Language",
+            "None of the above"
+          ],
+          "answer": "HyperText Markup Language"
+        },
+        {
+          "question": "Which one is a frontend language?",
+          "options": [
+            "Python",
+            "Java",
+            "HTML",
+            "Node.js"
+          ],
+          "answer": "HTML"
+        }
+      ]
+    },
+    {
+      "id": 32,
+      "name": "Course 32",
+      "logo": "https://cdn-icons-png.flaticon.com/512/2721/2721295.png",
+      "description": "This is a dummy description for a sample course on a tech topic. Learn the basics and explore key concepts.",
+      "notes": "https://example.com/course32.pdf",
+      "quiz": [
+        {
+          "question": "What is the main purpose of this course?",
+          "options": [
+            "Learn basics",
+            "Advanced topics",
+            "None",
+            "All"
+          ],
+          "answer": "Learn basics"
+        },
+        {
+          "question": "What does HTML stand for?",
+          "options": [
+            "Hyper Trainer Marking Language",
+            "HyperText Markup Language",
+            "HyperText Markdown Language",
+            "None of the above"
+          ],
+          "answer": "HyperText Markup Language"
+        },
+        {
+          "question": "Which one is a frontend language?",
+          "options": [
+            "Python",
+            "Java",
+            "HTML",
+            "Node.js"
+          ],
+          "answer": "HTML"
+        }
+      ]
+    }
+  ]
+
+  
+
+const CoursePage = () => {
+  const [enrolledCourses, setEnrolledCourses] = useState([]);
+  const [selectedCourse, setSelectedCourse] = useState(null);
+  const [quizCompleted, setQuizCompleted] = useState(false);
+
+  const handleEnroll = (course) => {
+    if (!enrolledCourses.some((c) => c.id === course.id)) {
+      setEnrolledCourses([...enrolledCourses, course]);
+    }
+    setSelectedCourse(course);
+    setQuizCompleted(false);
+  };
+
+  const handleSelect = (course) => {
+    setSelectedCourse(course);
+    setQuizCompleted(false);
+  };
+
+  const showAll = () => {
+    setSelectedCourse(null);
+  };
+
+  const handleQuizCompletion = () => {
+    setQuizCompleted(true);
+  };
+
+  return (
+    <div className="course-page-container">
+      {/* SidebarNav on the left */}
+      <SidebarNav
+        enrolledCourses={enrolledCourses}
+        onSelectCourse={handleSelect}
+        onShowAll={showAll}
+      />
+
+      <div className="courses-content">
+        {/* Title for Course Navigation */}
+        <div className="course-nav">
+          <h2>Course Navigation</h2>
+          <button onClick={showAll}>All Courses</button>
+        </div>
+
+        {!selectedCourse ? (
+          <>
+            <h2>Available Courses</h2>
+            <div className="courses-grid">
+              {coursesList.map((course) => (
+                <div key={course.id} className="course-card">
+                  <img src={course.logo} alt={course.name} />
+                  <h3>{course.name}</h3>
+                  <p className="short-desc">{course.description}</p>
+                  <button onClick={() => handleEnroll(course)}>Enroll</button>
+                </div>
+              ))}
+            </div>
+          </>
+        ) : (
+          <div className="enrolled-section">
+            <h2>{selectedCourse.name}</h2>
+            <div className="video-details-wrapper">
+              <div className="video-container">
+                <video controls>
+                  <source src={selectedCourse.video} type="video/mp4" />
+                  Your browser does not support the video tag.
+                </video>
+              </div>
+              <div className="details-container">
+                <h3>Description</h3>
+                <p>{selectedCourse.description}</p>
+                <h3>Notes</h3>
+                <p>{selectedCourse.notes}</p>
+                <h3>Quiz</h3>
+                <p>{selectedCourse.quiz}</p>
+                {!quizCompleted ? (
+                  <button onClick={handleQuizCompletion}>
+                    Complete Quiz & Generate Certificate
+                  </button>
+                ) : (
+                  <button
+                    onClick={() =>
+                      window.location.href =
+                        `/certificates/${selectedCourse.name.replace(/\s+/g, '-').toLowerCase()}`
+                    }
+                  >
+                    Generate Certificate
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default CoursePage;

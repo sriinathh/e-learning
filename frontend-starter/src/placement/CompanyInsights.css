@@ -1,0 +1,58 @@
+/* File: /src/components/CompanyInsights.css */
+.section {
+    padding: 20px;
+    background-color: #f4f4f9;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    margin-top: 20px;
+  }
+  
+  h2 {
+    font-size: 24px;
+    color: #333;
+    margin-bottom: 20px;
+    text-align: center;
+  }
+  
+  .insights-container {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+  
+  .insight-box {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: box-shadow 0.3s ease;
+  }
+  
+  .insight-box:hover {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  }
+  
+  .insight-box h3 {
+    font-size: 22px;
+    color: #007bff;
+    margin-bottom: 10px;
+  }
+  
+  .insight-box p {
+    font-size: 16px;
+    color: #555;
+  }
+  
+  .read-more {
+    display: inline-block;
+    margin-top: 10px;
+    font-size: 16px;
+    color: #007bff;
+    text-decoration: none;
+    transition: color 0.3s;
+  }
+  
+  .read-more:hover {
+    color: #0056b3;
+  }
+  

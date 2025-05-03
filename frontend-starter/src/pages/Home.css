@@ -1,0 +1,352 @@
+/* General Styles */
+body {
+  font-family: 'Poppins', sans-serif; /* Modern and elegant font */
+  margin: 0;
+  padding: 0;
+  background-color: #f4f7fc;
+  color: #333;
+}
+
+/* Home Container */
+.home-container {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Navbar */
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #1E2A47;
+  padding: 15px 30px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: background-color 0.3s ease;
+}
+
+.navbar:hover {
+  background-color: #172640; /* Darken navbar on hover */
+}
+
+.navbar .logo {
+  font-family: 'Raleway', sans-serif; /* Sleek font for logo */
+  font-size: 24px;
+  color: #fff;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.navbar .nav-links {
+  list-style: none;
+  display: flex;
+}
+
+.navbar .nav-links li {
+  margin: 0 15px;
+}
+
+.navbar .nav-links li a {
+  color: #fff;
+  text-decoration: none;
+  font-family: 'Lora', serif; /* Elegant serif font for links */
+  font-size: 16px;
+  font-weight: 500;
+  position: relative;
+  transition: color 0.3s ease, padding-bottom 0.3s ease;
+}
+
+.navbar .nav-links li a::after {
+  content: '';
+  display: block;
+  width: 0;
+  height: 2px;
+  background-color: #ff6f61;
+  transition: width 0.3s ease;
+}
+
+.navbar .nav-links li a:hover {
+  color: #ff6f61;
+  padding-bottom: 5px;
+}
+
+.navbar .nav-links li a:hover::after {
+  width: 100%;
+}
+
+/* Hero Section */
+.hero-section {
+  position: relative;
+  background: linear-gradient(to right, rgba(0, 36, 60, 0.8), rgba(0, 36, 60, 0.8)), url('https://via.placeholder.com/1600x800') no-repeat center center;
+  background-size: cover;
+  color: white;
+  padding: 120px 0;
+  text-align: center;
+  overflow: hidden;
+  animation: fadeIn 2s ease-in;
+}
+
+.hero-section .hero-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+}
+
+.hero-section .hero-content {
+  position: relative;
+  z-index: 1;
+}
+
+.hero-section .fade-in {
+  animation: fadeIn 1.5s ease-in;
+}
+
+.hero-section .fade-in-delay {
+  animation: fadeIn 2s ease-in;
+}
+
+.hero-section .search-bar {
+  margin-top: 20px;
+  display: inline-flex;
+  align-items: center;
+  background-color: white;
+  padding: 10px;
+  border-radius: 25px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.hero-section .search-bar input {
+  border: none;
+  outline: none;
+  padding: 10px;
+  font-size: 16px;
+  border-radius: 20px;
+  width: 250px;
+}
+
+.hero-section .search-bar button {
+  background-color: #ff6f61;
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  margin-left: 10px;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+.hero-section .search-bar button:hover {
+  background-color: #d25946;
+  transform: scale(1.05);
+}
+
+/* Categories Section */
+.categories {
+  padding: 50px 0;
+  background-color: #f9f9f9;
+  text-align: center;
+}
+
+.categories h2 {
+  font-family: 'Playfair Display', serif; /* Bold serif font */
+  font-size: 2rem;
+  margin-bottom: 20px;
+}
+
+.category-list {
+  display: flex;
+  justify-content: center;
+  gap: 30px;
+  flex-wrap: wrap;
+}
+
+.category-card {
+  background-color: #fff;
+  padding: 20px;
+  width: 200px;
+  text-align: center;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  transition: transform 0.3s ease-in-out, box-shadow 0.3s ease;
+}
+
+.category-card h3 {
+  font-family: 'Raleway', sans-serif;
+  font-size: 1.5rem;
+  margin-bottom: 10px;
+}
+
+.category-card p {
+  font-family: 'Roboto', sans-serif; /* Clean font */
+  font-size: 14px;
+  color: #777;
+}
+
+.category-card.zoom-in:hover {
+  transform: scale(1.05);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+}
+
+/* Featured Courses Section */
+.featured-courses {
+  padding: 50px 0;
+  background-color: #fff;
+  text-align: center;
+}
+
+.featured-courses h2 {
+  font-family: 'Poppins', sans-serif; /* Stylish font */
+  font-size: 2rem;
+  margin-bottom: 30px;
+}
+
+.course-list {
+  display: flex;
+  justify-content: center;
+  gap: 30px;
+  flex-wrap: wrap;
+}
+
+.course-card {
+  background-color: #f7f7f7;
+  width: 250px;
+  padding: 20px;
+  border-radius: 8px;
+  text-align: center;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease-in-out, box-shadow 0.3s ease;
+}
+
+.course-card img {
+  width: 100%;
+  border-radius: 8px;
+}
+
+.course-card h3 {
+  font-family: 'Lora', serif; /* Elegant serif font */
+  margin-top: 15px;
+  font-size: 1.25rem;
+}
+
+.course-card p {
+  font-size: 14px;
+  margin-top: 10px;
+  color: #777;
+}
+
+.course-card.pop-up:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+}
+
+/* Testimonials Section */
+.testimonials {
+  padding: 50px 0;
+  background-color: #fff;
+  text-align: center;
+}
+
+.testimonials h2 {
+  font-family: 'Playfair Display', serif;
+  font-size: 2rem;
+  margin-bottom: 30px;
+}
+
+.testimonial-card {
+  background-color: #f7f7f7;
+  padding: 20px;
+  width: 300px;
+  text-align: center;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  margin: 0 auto;
+  transition: transform 0.3s ease-in-out, box-shadow 0.3s ease;
+}
+
+.testimonial-card img {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.testimonial-card h3 {
+  margin-top: 15px;
+  font-family: 'Raleway', sans-serif;
+  font-size: 1.25rem;
+}
+
+.testimonial-card p {
+  font-size: 14px;
+  color: #777;
+}
+
+.testimonial-card:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+}
+
+/* Footer */
+.footer {
+  background-color: #1e2a47;
+  color: white;
+  padding: 30px;
+  text-align: center;
+}
+
+.footer .footer-links a {
+  color: #fff;
+  margin: 0 15px;
+  text-decoration: none;
+  transition: color 0.3s;
+}
+
+.footer .footer-links a:hover {
+  color: #ff6f61;
+}
+
+.footer .footer-socials a {
+  color: #fff;
+  margin: 0 10px;
+  text-decoration: none;
+  font-size: 20px;
+  transition: color 0.3s ease;
+}
+
+.footer .footer-socials a:hover {
+  color: #ff6f61;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slide-in-bottom {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes zoom-in {
+  from {
+    transform: scale(0.9);
+  }
+  to {
+    transform: scale(1);
+  }
+}
