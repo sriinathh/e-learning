@@ -8,16 +8,8 @@ const multer = require("multer");
 const http = require("http");
 const socketIo = require("socket.io");
 
-// Models
-const User = require("./models/User");
-const Community = require("./models/Community");
-
-// Set a default JWT_SECRET if none is provided in the .env file
-process.env.JWT_SECRET = process.env.JWT_SECRET || "educonnect_secure_jwt_secret";
-
-// Add default NODE_ENV if not set
-process.env.NODE_ENV = process.env.NODE_ENV || "development";
-
+// Import routes
+const authRoutes = require('./routes/auth');
 const userRoutes = require("./routes/userRoutes");
 const chatRoutes = require("./routes/chatRoutes");
 const groupRoutes = require("./routes/groupRoutes");
@@ -27,6 +19,17 @@ const materialRoutes = require("./routes/materialRoutes");
 const eventRoutes = require("./routes/eventRoutes");
 const forumRoutes = require("./routes/forumRoutes");
 const communityRoutes = require("./routes/communityRoutes");
+const simpleCourseRoutes = require("./routes/simpleCourseRoutes");
+
+// Models
+const User = require("./models/User");
+const Community = require("./models/Community");
+
+// Set a default JWT_SECRET if none is provided in the .env file
+process.env.JWT_SECRET = process.env.JWT_SECRET || "educonnect_secure_jwt_secret";
+
+// Add default NODE_ENV if not set
+process.env.NODE_ENV = process.env.NODE_ENV || "development";
 
 const app = express();
 const server = http.createServer(app);
@@ -71,6 +74,7 @@ mongoose
   .catch((err) => console.error("Mongo Error:", err));
 
 // Routes
+app.use('/api/auth', authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/chats", chatRoutes);
 app.use("/api/groups", groupRoutes);
@@ -80,6 +84,7 @@ app.use("/api/materials", materialRoutes);
 app.use("/api/events", eventRoutes);
 app.use("/api/forum", forumRoutes);
 app.use("/api/community", communityRoutes);
+app.use("/api/simple-course", simpleCourseRoutes);
 
 // Health check endpoint for frontend to verify server connection
 app.get("/api/health-check", (req, res) => {
@@ -227,6 +232,7 @@ app.use((req, res) => {
 app.use((err, req, res, next) => {
   console.error("Server Error:", err.stack);
   res.status(500).json({ 
+    success: false,
     message: "Internal Server Error",
     error: process.env.NODE_ENV === 'development' ? err.message : undefined
   });

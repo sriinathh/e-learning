@@ -1,671 +1,526 @@
 import React, { useState, useEffect, useRef } from 'react';
-import {
+import { 
   Box, 
   Flex, 
-  Grid, 
-  GridItem,
   Text, 
+  Button, 
+  Input, 
+  useToast, 
+  Avatar, 
+  VStack, 
+  HStack, 
   Heading, 
-  Button,
-  Icon,
-  useToast,
-  useDisclosure,
-  Spinner,
+  Spinner, 
+  Divider, 
   Badge,
-  Divider,
-  Alert,
-  AlertIcon,
-  AlertTitle,
-  AlertDescription
+  Modal,
+  ModalOverlay,
+  ModalContent,
+  ModalHeader,
+  ModalFooter,
+  ModalBody,
+  ModalCloseButton,
+  FormControl,
+  FormLabel,
+  Textarea,
+  IconButton,
+  Image
 } from '@chakra-ui/react';
-import { FiUsers, FiMessageSquare, FiPlus, FiRefreshCw, FiAlertTriangle } from 'react-icons/fi';
-import CommunityList from '../components/community/CommunityList';
-import CommunityChat from '../components/community/CommunityChat';
-import CommunityMembers from '../components/community/CommunityMembers';
-import CommunityModal from '../components/community/CommunityModal';
-import DirectMessaging from '../components/community/DirectMessaging';
+import { FiUsers, FiMessageCircle, FiSearch, FiPlus, FiLogOut, FiCamera, FiUserPlus } from 'react-icons/fi';
+import UsersList from '../components/UsersList';
+import ChatArea from '../components/ChatArea';
+import { getMockCommunities } from '../utils/socketService';
 import { useSocket } from '../context/SocketContext';
-import axios from 'axios';
+import { createTestUser } from '../utils/mockUser';
+import './Community.css';
 
 const CommunityPage = () => {
-  const toast = useToast();
-  const messagesEndRef = useRef(null);
-  const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
-  
-  // Socket context
-  const { 
-    socket, 
-    connected, 
-    connectionError,
-    joinCommunity, 
-    leaveCommunity, 
-    sendCommunityMessage,
-    sendDirectMessage
-  } = useSocket();
-  
-  // States
-  const [loading, setLoading] = useState(true);
+  const { socket } = useSocket();
   const [communities, setCommunities] = useState([]);
-  const [selectedCommunity, setSelectedCommunity] = useState(null);
-  const [messages, setMessages] = useState([]);
-  const [members, setMembers] = useState([]);
-  const [activeUsers, setActiveUsers] = useState([]);
-  const [directMessageUser, setDirectMessageUser] = useState(null);
-  const [directMessages, setDirectMessages] = useState([]);
-  const [hasMoreMessages, setHasMoreMessages] = useState(false);
-  const [page, setPage] = useState(0);
-  const [loadingMoreMessages, setLoadingMoreMessages] = useState(false);
+  const [currentCommunity, setCurrentCommunity] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [user, setUser] = useState(null);
+  const toast = useToast();
   
-  // Modal controls
-  const { 
-    isOpen: isCreateCommunityOpen, 
-    onOpen: onCreateCommunityOpen, 
-    onClose: onCreateCommunityClose 
-  } = useDisclosure();
-  
-  // Get current user from localStorage
-  const [currentUser, setCurrentUser] = useState(() => {
-    const storedUser = localStorage.getItem('user');
-    if (storedUser) {
-      try {
-        return JSON.parse(storedUser);
-      } catch (error) {
-        console.error('Error parsing user data:', error);
-        return null;
-      }
-    }
-    return null;
-  });
-  
-  // Get token from localStorage
-  const getAuthHeader = () => {
-    const token = localStorage.getItem('token');
-    return token ? { Authorization: `Bearer ${token}` } : {};
-  };
-  
-  // Set up socket event listeners
-  useEffect(() => {
-    if (!socket) return;
-    
-    // Listen for new community messages
-    socket.on('newCommunityMessage', (message) => {
-      // Only update messages if we're in the same community
-      if (selectedCommunity && message.community === selectedCommunity._id) {
-        setMessages(prevMessages => [...prevMessages, message]);
-        scrollToBottom();
-      }
-    });
-    
-    // Listen for new direct messages
-    socket.on('newDirectMessage', (message) => {
-      // Only update messages if we're chatting with this user
-      if (directMessageUser && 
-         (message.sender._id === directMessageUser._id || 
-          message.recipient._id === directMessageUser._id)) {
-        setDirectMessages(prevMessages => [...prevMessages, message]);
-        scrollToBottom();
-      }
-    });
-    
-    // Listen for user status changes
-    socket.on('userStatusChange', ({ userId, status }) => {
-      // Update active users list
-      setActiveUsers(prevUsers => 
-        prevUsers.map(user => 
-          user._id === userId 
-            ? { ...user, isOnline: status === 'online' } 
-            : user
-        )
-      );
-      
-      // Update members list if in a community
-      if (selectedCommunity) {
-        setMembers(prevMembers => 
-          prevMembers.map(member => 
-            member._id === userId 
-              ? { ...member, isOnline: status === 'online' } 
-              : member
-          )
-        );
-      }
-    });
-    
-    return () => {
-      socket.off('newCommunityMessage');
-      socket.off('newDirectMessage');
-      socket.off('userStatusChange');
-    };
-  }, [socket, selectedCommunity, directMessageUser]);
-  
-  // Fetch all communities
-  const fetchCommunities = async () => {
-    try {
-      const response = await axios.get(`${API_URL}/community`, { 
-        headers: getAuthHeader()
-      });
-      setCommunities(response.data);
-    } catch (error) {
-      console.error('Error fetching communities:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to fetch communities',
-        status: 'error',
-        duration: 3000,
-        isClosable: true,
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-  
-  // Fetch community details
-  const fetchCommunityDetails = async (communityId) => {
-    try {
-      const response = await axios.get(`${API_URL}/community/${communityId}`, {
-        headers: getAuthHeader()
-      });
-      setSelectedCommunity(response.data);
-      setMembers(response.data.members || []);
-      fetchCommunityMessages(communityId);
-      
-      // Join the community room for real-time updates
-      joinCommunity(communityId);
-    } catch (error) {
-      console.error('Error fetching community details:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to fetch community details',
-        status: 'error',
-        duration: 3000,
-        isClosable: true,
-      });
-    }
-  };
-  
-  // Fetch community messages
-  const fetchCommunityMessages = async (communityId, pageNum = 0) => {
-    try {
-      if (pageNum === 0) {
-        setMessages([]);
-        setPage(0);
-      }
-      
-      setLoadingMoreMessages(pageNum > 0);
-      
-      const response = await axios.get(
-        `${API_URL}/community/${communityId}/messages?page=${pageNum}&limit=50`, 
-        { headers: getAuthHeader() }
-      );
-      
-      if (pageNum === 0) {
-        setMessages(response.data.messages);
-      } else {
-        setMessages(prev => [...response.data.messages, ...prev]);
-      }
-      
-      setHasMoreMessages(response.data.hasMore);
-      setPage(pageNum);
-    } catch (error) {
-      console.error('Error fetching messages:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to fetch messages',
-        status: 'error',
-        duration: 3000,
-        isClosable: true,
-      });
-    } finally {
-      setLoadingMoreMessages(false);
-    }
-  };
-  
-  // Fetch active users
-  const fetchActiveUsers = async () => {
-    try {
-      const response = await axios.get(`${API_URL}/community/users/active`, {
-        headers: getAuthHeader()
-      });
-      setActiveUsers(response.data);
-    } catch (error) {
-      console.error('Error fetching active users:', error);
-    }
-  };
-  
-  // Fetch direct messages
-  const fetchDirectMessages = async (userId) => {
-    try {
-      setDirectMessages([]);
-      const response = await axios.get(`${API_URL}/community/direct/${userId}`, {
-        headers: getAuthHeader()
-      });
-      setDirectMessages(response.data.messages);
-    } catch (error) {
-      console.error('Error fetching direct messages:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to fetch direct messages',
-        status: 'error',
-        duration: 3000,
-        isClosable: true,
-      });
-    }
-  };
-  
-  // Handle creating a new community
-  const handleCreateCommunity = async (communityData) => {
-    try {
-      const response = await axios.post(`${API_URL}/community`, communityData, {
-        headers: getAuthHeader()
-      });
-      
-      setCommunities(prev => [...prev, response.data]);
-      toast({
-        title: 'Success',
-        description: 'Community created successfully',
-        status: 'success',
-        duration: 3000,
-        isClosable: true,
-      });
-      onCreateCommunityClose();
-    } catch (error) {
-      console.error('Error creating community:', error);
-      toast({
-        title: 'Error',
-        description: error.response?.data?.message || 'Failed to create community',
-        status: 'error',
-        duration: 3000,
-        isClosable: true,
-      });
-    }
-  };
-  
-  // Handle joining a community
-  const handleJoinCommunity = async (communityId) => {
-    try {
-      await axios.post(`${API_URL}/community/${communityId}/join`, {}, {
-        headers: getAuthHeader()
-      });
-      
-      // Update communities list
-      fetchCommunities();
-      
-      // If selected community is the one joined, refresh details
-      if (selectedCommunity && selectedCommunity._id === communityId) {
-        fetchCommunityDetails(communityId);
-      }
-      
-      // Join the community room for real-time updates
-      joinCommunity(communityId);
-      
-      toast({
-        title: 'Success',
-        description: 'Joined community successfully',
-        status: 'success',
-        duration: 3000,
-        isClosable: true,
-      });
-    } catch (error) {
-      console.error('Error joining community:', error);
-      toast({
-        title: 'Error',
-        description: error.response?.data?.message || 'Failed to join community',
-        status: 'error',
-        duration: 3000,
-        isClosable: true,
-      });
-    }
-  };
-  
-  // Handle leaving a community
-  const handleLeaveCommunity = async (communityId) => {
-    try {
-      await axios.post(`${API_URL}/community/${communityId}/leave`, {}, {
-        headers: getAuthHeader()
-      });
-      
-      // Update communities list
-      fetchCommunities();
-      
-      // If selected community is the one left, clear selection
-      if (selectedCommunity && selectedCommunity._id === communityId) {
-        setSelectedCommunity(null);
-        setMessages([]);
-        setMembers([]);
-      }
-      
-      // Leave the community room
-      leaveCommunity(communityId);
-      
-      toast({
-        title: 'Success',
-        description: 'Left community successfully',
-        status: 'success',
-        duration: 3000,
-        isClosable: true,
-      });
-    } catch (error) {
-      console.error('Error leaving community:', error);
-      toast({
-        title: 'Error',
-        description: error.response?.data?.message || 'Failed to leave community',
-        status: 'error',
-        duration: 3000,
-        isClosable: true,
-      });
-    }
-  };
-  
-  // Handle sending a message to a community
-  const handleSendCommunityMessage = async (content, attachments = []) => {
-    if (!selectedCommunity) return;
-    
-    try {
-      const formData = new FormData();
-      formData.append('content', content);
-      
-      if (attachments.length > 0) {
-        attachments.forEach(file => {
-          formData.append('attachments', file);
-        });
-      }
-      
-      const response = await axios.post(
-        `${API_URL}/community/${selectedCommunity._id}/messages`, 
-        formData,
-        {
-          headers: {
-            ...getAuthHeader(),
-            'Content-Type': 'multipart/form-data'
-          }
-        }
-      );
-      
-      // Add message to local state
-      setMessages(prev => [...prev, response.data]);
-      
-      // Send the message through the socket for real-time updates
-      sendCommunityMessage(response.data);
-      
-      scrollToBottom();
-    } catch (error) {
-      console.error('Error sending message:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to send message',
-        status: 'error',
-        duration: 3000,
-        isClosable: true,
-      });
-    }
-  };
-  
-  // Handle sending a direct message
-  const handleSendDirectMessage = async (content, attachments = []) => {
-    if (!directMessageUser) return;
-    
-    try {
-      const formData = new FormData();
-      formData.append('content', content);
-      
-      if (attachments.length > 0) {
-        attachments.forEach(file => {
-          formData.append('attachments', file);
-        });
-      }
-      
-      const response = await axios.post(
-        `${API_URL}/community/direct/${directMessageUser._id}`, 
-        formData,
-        {
-          headers: {
-            ...getAuthHeader(),
-            'Content-Type': 'multipart/form-data'
-          }
-        }
-      );
-      
-      // Add message to local state
-      setDirectMessages(prev => [...prev, response.data]);
-      
-      // Send the message through the socket for real-time updates
-      sendDirectMessage(response.data);
-      
-      scrollToBottom();
-    } catch (error) {
-      console.error('Error sending direct message:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to send direct message',
-        status: 'error',
-        duration: 3000,
-        isClosable: true,
-      });
-    }
-  };
-  
-  // Handle selecting a community
-  const handleSelectCommunity = (community) => {
-    // If we were already in a community, leave that room
-    if (selectedCommunity) {
-      leaveCommunity(selectedCommunity._id);
-    }
-    
-    setSelectedCommunity(community);
-    fetchCommunityDetails(community._id);
-    setDirectMessageUser(null);
-    setDirectMessages([]);
-  };
-  
-  // Handle selecting a user for direct messaging
-  const handleSelectDirectUser = (user) => {
-    // If we were in a community, leave that room
-    if (selectedCommunity) {
-      leaveCommunity(selectedCommunity._id);
-    }
-    
-    setSelectedCommunity(null);
-    setDirectMessageUser(user);
-    fetchDirectMessages(user._id);
-  };
-  
-  // Load more messages
-  const handleLoadMoreMessages = () => {
-    if (loadingMoreMessages || !hasMoreMessages) return;
-    
-    if (selectedCommunity) {
-      fetchCommunityMessages(selectedCommunity._id, page + 1);
-    }
-  };
-  
-  // Scroll to bottom of messages
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  };
-  
-  // Initial data loading
-  useEffect(() => {
-    fetchCommunities();
-    fetchActiveUsers();
-    
-    // Refresh active users periodically
-    const intervalId = setInterval(() => {
-      fetchActiveUsers();
-    }, 30000); // every 30 seconds
-    
-    return () => clearInterval(intervalId);
-  }, []);
-  
-  // Scroll to bottom when messages change
-  useEffect(() => {
-    scrollToBottom();
-  }, [messages, directMessages]);
+  // Create community state
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [newCommunityName, setNewCommunityName] = useState('');
+  const [newCommunityDesc, setNewCommunityDesc] = useState('');
+  const [newCommunityPhoto, setNewCommunityPhoto] = useState(null);
+  const [newCommunityPhotoPreview, setNewCommunityPhotoPreview] = useState('');
+  const fileInputRef = useRef(null);
 
-  // Function to handle server restart
-  const handleRestartServer = () => {
+  // Initialize user from localStorage
+  useEffect(() => {
+    try {
+      const userData = JSON.parse(localStorage.getItem('user'));
+      if (userData) {
+        setUser({
+          id: userData.id || userData._id,
+          name: userData.name || userData.username || 'User',
+          email: userData.email,
+          avatar: userData.avatar || userData.profilePic || `https://ui-avatars.com/api/?name=${encodeURIComponent(userData.name || userData.username || 'User')}&background=random`,
+        });
+      } else {
+        // Fallback user if not logged in
+        setUser({
+          id: 'guest-' + Math.random().toString(36).substr(2, 9),
+          name: 'Guest User',
+          avatar: 'https://ui-avatars.com/api/?name=Guest+User&background=random'
+        });
+      }
+    } catch (error) {
+      console.error("Error parsing user data:", error);
+      setUser({
+        id: 'guest-' + Math.random().toString(36).substr(2, 9),
+        name: 'Guest User',
+        avatar: 'https://ui-avatars.com/api/?name=Guest+User&background=random'
+      });
+    }
+  }, []);
+
+  // Fetch communities
+  useEffect(() => {
+    if (socket) {
+      setLoading(true);
+      
+      // Request communities list from server
+      socket.emit('get_communities');
+      
+      // Listen for communities list
+      socket.on('communities_list', (communitiesList) => {
+        setCommunities(communitiesList);
+        if (!currentCommunity) {
+          setCurrentCommunity(communitiesList.find(c => c.isJoined) || null);
+        }
+        setLoading(false);
+      });
+      
+      // If no response in 3 seconds, use mock data
+      const timeout = setTimeout(() => {
+        if (loading) {
+          const mockCommunities = getMockCommunities().map(community => ({
+            ...community,
+            description: "This is a sample community for discussion and collaboration.",
+            photo: `https://picsum.photos/seed/${community.id}/200/200`
+          }));
+          
+          setCommunities(mockCommunities);
+          if (!currentCommunity) {
+            setCurrentCommunity(mockCommunities.find(c => c.isJoined) || null);
+          }
+          setLoading(false);
+        }
+      }, 3000);
+      
+      // Listen for community updates
+      socket.on('community_updated', (updatedCommunity) => {
+        setCommunities(prev => 
+          prev.map(comm => comm.id === updatedCommunity.id ? updatedCommunity : comm)
+        );
+        
+        // If current community is updated, update it
+        if (currentCommunity?.id === updatedCommunity.id) {
+          setCurrentCommunity(updatedCommunity);
+        }
+      });
+      
+      // Listen for new communities
+      socket.on('new_community', (newCommunity) => {
+        setCommunities(prev => [...prev, newCommunity]);
+      });
+      
+      return () => {
+        clearTimeout(timeout);
+        socket.off('communities_list');
+        socket.off('community_updated');
+        socket.off('new_community');
+      };
+    }
+  }, [socket]); // Only depend on socket changes
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setNewCommunityPhoto(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setNewCommunityPhotoPreview(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const openCreateModal = () => {
+    setIsCreateModalOpen(true);
+  };
+
+  const closeCreateModal = () => {
+    setIsCreateModalOpen(false);
+    // Reset form
+    setNewCommunityName('');
+    setNewCommunityDesc('');
+    setNewCommunityPhoto(null);
+    setNewCommunityPhotoPreview('');
+  };
+
+  const createCommunity = () => {
+    if (!newCommunityName.trim()) {
+      toast({
+        title: 'Error',
+        description: 'Please enter a community name',
+        status: 'error',
+        duration: 3000,
+        isClosable: true,
+      });
+      return;
+    }
+    
+    // In a real app, you would upload the photo to a server
+    // Here we'll use the data URL for the mock
+    const photoUrl = newCommunityPhotoPreview || `https://picsum.photos/seed/${Date.now()}/200/200`;
+    
+    const newCommunity = {
+      id: Date.now().toString(),
+      name: newCommunityName,
+      description: newCommunityDesc || `A community for ${newCommunityName}`,
+      photo: photoUrl,
+      members: 1,
+      isJoined: true,
+      createdBy: user.id,
+      createdAt: new Date().toISOString()
+    };
+    
+    if (socket) {
+      socket.emit('create_community', newCommunity);
+    }
+    
+    setCommunities([...communities, newCommunity]);
+    setCurrentCommunity(newCommunity);
+    closeCreateModal();
+    
     toast({
-      title: "Attempting to reconnect",
-      description: "Please wait while we try to reconnect to the server",
-      status: "info",
+      title: 'Success',
+      description: `Community "${newCommunityName}" created!`,
+      status: 'success',
       duration: 3000,
       isClosable: true,
     });
-    
-    // Refresh the page to reinitialize the socket connection
-    window.location.reload();
   };
-  
+
+  const joinCommunity = (communityId) => {
+    if (!socket || !user) return;
+    
+    // Emit join event with user data
+    socket.emit('join_community', { 
+      userId: user.id, 
+      communityId,
+      userInfo: {
+        id: user.id,
+        name: user.name,
+        avatar: user.avatar,
+        email: user.email
+      }
+    });
+    
+    // Update local state (the socket service will broadcast the update to all clients)
+    // We don't need to update communities here as the socket event will handle it
+    
+    // But we can update the UI immediately for better experience
+    const community = communities.find(c => c.id === communityId);
+    if (community) {
+      setCurrentCommunity(community);
+    }
+    
+    toast({
+      title: 'Joined',
+      description: `You've joined the community!`,
+      status: 'success',
+      duration: 3000,
+      isClosable: true,
+    });
+  };
+
+  const leaveCommunity = (communityId) => {
+    if (!socket || !user) return;
+    
+    // Emit leave event
+    socket.emit('leave_community', { userId: user.id, communityId });
+    
+    // We don't need to update communities here as the socket event will handle it
+    
+    // But update the current community immediately for better UX
+    const remaining = communities.filter(c => c.isJoined && c.id !== communityId);
+    setCurrentCommunity(remaining.length > 0 ? remaining[0] : null);
+    
+    toast({
+      title: 'Left',
+      description: `You've left the community`,
+      status: 'info',
+      duration: 3000,
+      isClosable: true,
+    });
+  };
+
+  const filteredCommunities = communities.filter(comm => 
+    comm.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (comm.description && comm.description.toLowerCase().includes(searchTerm.toLowerCase()))
+  );
+
+  if (!user) return <Spinner size="xl" />;
+
   return (
-    <Box p={4}>
-      <Flex justifyContent="space-between" alignItems="center" mb={4}>
-        <Heading size="lg">Community Chat</Heading>
-        <Button 
-          leftIcon={<Icon as={FiPlus} />} 
-          colorScheme="blue" 
-          onClick={onCreateCommunityOpen}
-        >
-          Create Community
-        </Button>
-      </Flex>
-      
-      {connectionError && (
-        <Alert status="error" mb={4} borderRadius="md">
-          <AlertIcon as={FiAlertTriangle} />
-          <Box flex="1">
-            <AlertTitle>Connection Error</AlertTitle>
-            <AlertDescription>
-              Could not connect to the chat server. Make sure the backend server is running.
-            </AlertDescription>
-          </Box>
-          <Button colorScheme="red" size="sm" onClick={handleRestartServer}>
-            Reconnect
+    <Flex className="community-container" h="calc(100vh - 80px)" bg="gray.50">
+      {/* Left sidebar - Communities list */}
+      <Box className="communities-sidebar" w="300px" bg="white" boxShadow="sm" p={4} overflowY="auto">
+        <VStack spacing={4} align="stretch">
+          <Heading size="md" mb={2}>Communities</Heading>
+          
+          <Button 
+            colorScheme="teal" 
+            leftIcon={<FiPlus />} 
+            onClick={openCreateModal}
+            mb={2}
+          >
+            Create Community
           </Button>
-        </Alert>
-      )}
-      
-      {!connected && !connectionError && (
-        <Box mb={4} p={2} bg="yellow.100" borderRadius="md">
-          <Text>Connecting to server...</Text>
-        </Box>
-      )}
-      
-      {loading ? (
-        <Flex justify="center" align="center" height="60vh">
-          <Spinner size="xl" />
-        </Flex>
-      ) : (
-        <Grid templateColumns={{ base: "1fr", md: "300px 1fr 250px" }} gap={4}>
-          {/* Communities List */}
-          <GridItem>
-            <Flex direction="column" h="75vh" borderWidth={1} borderRadius="md" overflow="hidden">
-              <Box p={3} bg="blue.500" color="white">
-                <Flex align="center" justify="space-between">
-                  <Flex align="center">
-                    <Icon as={FiUsers} mr={2} />
-                    <Text fontWeight="bold">Communities</Text>
+          
+          <Input
+            placeholder="Search communities..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            leftIcon={<FiSearch />}
+            mb={2}
+          />
+          
+          <Divider />
+          
+          {loading ? (
+            <Spinner />
+          ) : (
+            <VStack spacing={3} align="stretch" mt={2}>
+              {filteredCommunities.map((community) => (
+                <Box 
+                  key={community.id}
+                  p={3}
+                  borderRadius="md"
+                  bg={currentCommunity?.id === community.id ? "teal.50" : "white"}
+                  borderWidth="1px"
+                  borderColor={currentCommunity?.id === community.id ? "teal.300" : "gray.200"}
+                  _hover={{ bg: "gray.50" }}
+                  cursor="pointer"
+                  onClick={() => community.isJoined && setCurrentCommunity(community)}
+                >
+                  <Flex align="center" mb={2}>
+                    <Avatar 
+                      size="sm" 
+                      name={community.name} 
+                      src={community.photo} 
+                      mr={2}
+                    />
+                    <Text fontWeight="bold">{community.name}</Text>
                   </Flex>
-                  <Button size="sm" variant="outline" colorScheme="whiteAlpha" leftIcon={<FiRefreshCw />} onClick={fetchCommunities}>
-                    Refresh
+                  
+                  {community.description && (
+                    <Text fontSize="sm" color="gray.600" noOfLines={2} mb={2}>
+                      {community.description}
+                    </Text>
+                  )}
+                  
+                  <Flex justify="space-between" align="center">
+                    <Text fontSize="sm" color="gray.500">
+                      <FiUsers style={{ display: 'inline', marginRight: '5px' }} />
+                      {community.members} members
+                    </Text>
+                    
+                    {community.isJoined ? (
+                      <Button 
+                        size="sm" 
+                        colorScheme="red" 
+                        variant="outline"
+                        leftIcon={<FiLogOut />}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          leaveCommunity(community.id);
+                        }}
+                      >
+                        Leave
+                      </Button>
+                    ) : (
+                      <Button 
+                        size="sm" 
+                        colorScheme="teal"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          joinCommunity(community.id);
+                        }}
+                      >
+                        Join
+                      </Button>
+                    )}
+                  </Flex>
+                </Box>
+              ))}
+              
+              {filteredCommunities.length === 0 && (
+                <Box p={4} textAlign="center">
+                  <Text color="gray.500">No communities found</Text>
+                  <Button 
+                    mt={4} 
+                    colorScheme="teal" 
+                    size="sm" 
+                    onClick={openCreateModal}
+                  >
+                    Create one
                   </Button>
-                </Flex>
-              </Box>
-              <Box flex="1" overflowY="auto" bg="gray.50">
-                <CommunityList 
-                  communities={communities}
-                  currentUser={currentUser}
-                  selectedCommunity={selectedCommunity}
-                  onSelectCommunity={handleSelectCommunity}
-                  onJoinCommunity={handleJoinCommunity}
-                  onLeaveCommunity={handleLeaveCommunity}
-                />
-              </Box>
-              <Box p={3} bg="gray.100">
-                <Text fontSize="sm">
-                  <Badge colorScheme={connected ? "green" : "red"} mr={1}>
-                    {connected ? "Connected" : "Disconnected"}
-                  </Badge>
-                  {connected && <span>{activeUsers.filter(u => u.isOnline).length} users online</span>}
-                </Text>
-              </Box>
-            </Flex>
-          </GridItem>
+                </Box>
+              )}
+            </VStack>
+          )}
+        </VStack>
+      </Box>
+
+      {/* Middle - Chat area */}
+      <Box flex={1} bg="white" borderWidth="1px" borderColor="gray.200" p={0}>
+        {currentCommunity ? (
+          <ChatArea 
+            socket={socket}
+            community={currentCommunity}
+            user={user}
+          />
+        ) : (
+          <Flex 
+            direction="column" 
+            align="center" 
+            justify="center" 
+            h="100%" 
+            p={8}
+            bg="gray.50"
+          >
+            <FiMessageCircle size={60} color="#A0AEC0" />
+            <Text fontSize="xl" mt={4} textAlign="center" color="gray.500">
+              Join or create a community to start chatting
+            </Text>
+            <Button 
+              mt={4} 
+              colorScheme="teal" 
+              leftIcon={<FiPlus />} 
+              onClick={openCreateModal}
+            >
+              Create Community
+            </Button>
+          </Flex>
+        )}
+      </Box>
+
+      {/* Right sidebar - Users list */}
+      <Box w="280px" bg="white" boxShadow="sm" p={4} overflowY="auto">
+        <VStack spacing={4} align="stretch">
+          <Button 
+            size="sm" 
+            colorScheme="purple" 
+            leftIcon={<FiUserPlus />}
+            onClick={() => {
+              // Create a test user with random name
+              const names = ['Alice', 'Bob', 'Carol', 'Dave', 'Eve', 'Frank', 'Grace', 'Heidi'];
+              const randomName = names[Math.floor(Math.random() * names.length)];
+              const newUser = createTestUser(randomName);
+              
+              // Refresh the page to reload with new user
+              window.location.reload();
+            }}
+          >
+            Switch Test User
+          </Button>
           
-          {/* Chat Area */}
-          <GridItem>
-            {selectedCommunity ? (
-              <CommunityChat 
-                community={selectedCommunity}
-                messages={messages} 
-                currentUser={currentUser}
-                onSendMessage={handleSendCommunityMessage}
-                hasMoreMessages={hasMoreMessages}
-                onLoadMoreMessages={handleLoadMoreMessages}
-                loadingMoreMessages={loadingMoreMessages}
-                messagesEndRef={messagesEndRef}
-                isConnected={connected}
-              />
-            ) : directMessageUser ? (
-              <DirectMessaging
-                recipient={directMessageUser}
-                messages={directMessages}
-                currentUser={currentUser}
-                onSendMessage={handleSendDirectMessage}
-                messagesEndRef={messagesEndRef}
-                isConnected={connected}
-              />
-            ) : (
-              <Flex 
-                direction="column" 
-                justify="center" 
-                align="center" 
-                h="75vh" 
-                borderWidth={1} 
-                borderRadius="md"
-                bg="gray.50"
-              >
-                <Icon as={FiMessageSquare} boxSize={12} color="gray.300" mb={4} />
-                <Text fontSize="lg" color="gray.500">
-                  Select a community or user to start chatting
-                </Text>
-                {connectionError && (
-                  <Text mt={2} color="red.500" fontSize="sm">
-                    Note: Real-time features will be unavailable until the server connection is restored.
-                  </Text>
-                )}
-              </Flex>
-            )}
-          </GridItem>
-          
-          {/* Members List */}
-          <GridItem>
-            <Flex direction="column" h="75vh" borderWidth={1} borderRadius="md" overflow="hidden">
-              <Box p={3} bg="blue.500" color="white">
-                <Flex align="center">
-                  <Icon as={FiUsers} mr={2} />
-                  <Text fontWeight="bold">Members & Contacts</Text>
-                </Flex>
-              </Box>
-              <Box flex="1" overflowY="auto" bg="gray.50">
-                <CommunityMembers 
-                  members={selectedCommunity ? members : []}
-                  activeUsers={activeUsers}
-                  currentUser={currentUser}
-                  selectedUser={directMessageUser}
-                  onSelectUser={handleSelectDirectUser}
-                  showAllUsers={!selectedCommunity}
-                />
-              </Box>
-            </Flex>
-          </GridItem>
-        </Grid>
-      )}
+          <UsersList 
+            socket={socket}
+            communityId={currentCommunity?.id}
+            currentUser={user}
+          />
+        </VStack>
+      </Box>
       
       {/* Create Community Modal */}
-      <CommunityModal 
-        isOpen={isCreateCommunityOpen} 
-        onClose={onCreateCommunityClose}
-        onSubmit={handleCreateCommunity}
-      />
-    </Box>
+      <Modal isOpen={isCreateModalOpen} onClose={closeCreateModal}>
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>Create New Community</ModalHeader>
+          <ModalCloseButton />
+          <ModalBody>
+            <VStack spacing={4}>
+              <Flex 
+                w="full" 
+                justify="center" 
+                direction="column" 
+                align="center"
+              >
+                <Box 
+                  position="relative" 
+                  mb={4}
+                >
+                  <Avatar 
+                    size="xl" 
+                    src={newCommunityPhotoPreview || 'https://via.placeholder.com/150?text=Community'}
+                    name={newCommunityName || "New Community"}
+                  />
+                  <IconButton
+                    icon={<FiCamera />}
+                    aria-label="Upload photo"
+                    size="sm"
+                    colorScheme="teal"
+                    isRound
+                    position="absolute"
+                    bottom="0"
+                    right="0"
+                    onClick={() => fileInputRef.current?.click()}
+                  />
+                  <input
+                    type="file"
+                    ref={fileInputRef}
+                    onChange={handleFileChange}
+                    style={{ display: 'none' }}
+                    accept="image/*"
+                  />
+                </Box>
+                <Text fontSize="sm" color="gray.500">
+                  Click on the camera icon to upload a community photo
+                </Text>
+              </Flex>
+              
+              <FormControl isRequired>
+                <FormLabel>Community Name</FormLabel>
+                <Input 
+                  placeholder="Enter community name" 
+                  value={newCommunityName}
+                  onChange={(e) => setNewCommunityName(e.target.value)}
+                />
+              </FormControl>
+              
+              <FormControl>
+                <FormLabel>Description</FormLabel>
+                <Textarea 
+                  placeholder="Describe your community" 
+                  value={newCommunityDesc}
+                  onChange={(e) => setNewCommunityDesc(e.target.value)}
+                  rows={4}
+                />
+              </FormControl>
+            </VStack>
+          </ModalBody>
+
+          <ModalFooter>
+            <Button variant="ghost" mr={3} onClick={closeCreateModal}>
+              Cancel
+            </Button>
+            <Button colorScheme="teal" onClick={createCommunity}>
+              Create
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
+    </Flex>
   );
 };
 

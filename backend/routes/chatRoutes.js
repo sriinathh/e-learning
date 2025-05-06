@@ -27,7 +27,7 @@ router.get("/messages", verifyToken, async (req, res) => {
     const messages = await Message.find()
       .sort({ createdAt: 1 })
       .populate("sender", "username profilePic");
-
+    
     // Format messages for client
     const formattedMessages = messages.map(msg => ({
       id: msg._id,
@@ -43,7 +43,7 @@ router.get("/messages", verifyToken, async (req, res) => {
       }),
       isCurrentUser: msg.sender._id.toString() === req.userId
     }));
-
+    
     res.json(formattedMessages);
   } catch (error) {
     console.error("Error fetching messages:", error);
@@ -59,17 +59,17 @@ router.post("/messages", verifyToken, async (req, res) => {
     if (!content || content.trim() === "") {
       return res.status(400).json({ message: "Message content is required" });
     }
-
+    
     const newMessage = new Message({
       content,
       sender: req.userId
     });
-
+    
     await newMessage.save();
     
     // Populate sender info
     await newMessage.populate("sender", "username profilePic");
-
+    
     // Format for client
     const formattedMessage = {
       id: newMessage._id,
@@ -85,7 +85,7 @@ router.post("/messages", verifyToken, async (req, res) => {
       }),
       isCurrentUser: true
     };
-
+    
     res.status(201).json(formattedMessage);
   } catch (error) {
     console.error("Error sending message:", error);
@@ -113,7 +113,7 @@ router.get("/users", verifyToken, async (req, res) => {
         isOnline: isOnline || user._id.toString() === req.userId
       };
     });
-
+    
     res.json(formattedUsers);
   } catch (error) {
     console.error("Error fetching users:", error);

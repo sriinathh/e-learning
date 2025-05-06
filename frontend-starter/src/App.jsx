@@ -12,10 +12,11 @@ import CoursePage from './components/courses/CoursePage';
 import PlacementHub from './placement/PlacementHub';
 import JobOpportunities from "./placement/JobOpportunities";
 import ChatbotPage from './pages/ChatbotPage'; 
-import CommunityChat from "./pages/CommunityChat";
 import CampusConnectPage from "./pages/CampusConnectPage";
 import CommunityPage from "./pages/CommunityPage";
-import SimpleCommunity from "./pages/SimpleCommunity";
+import DirectMessaging from './pages/DirectMessaging';
+import SimpleCourse from './components/SimpleCourse';
+
 import PrivateRoute from "./components/PrivateRoute"; // Ensure it's implemented correctly
 import Resources from './components/courses/Resources';
 import CertificatePage from './components/courses/CertificatePage'; 
@@ -32,7 +33,7 @@ import MaterialsPage from './components/materials/MaterialsPage';
 import EventsPage from './components/events/EventsPage';
 import UdemyStyleCoursePage from './components/courses/UdemyStyleCoursePage';
 
-import SimpleCourse from './components/courses/SimpleCourse';
+
 
 // Create a custom theme for Chakra UI
 const colors = {
@@ -132,12 +133,10 @@ const App = () => {
             <Route path="/placement" element={<PrivateRoute><PlacementHub /></PrivateRoute>} />
             <Route path="/placement/jobOpportunities" element={<PrivateRoute><JobOpportunities /></PrivateRoute>} />
             <Route path="/chatbot" element={<PrivateRoute><ChatbotPage /></PrivateRoute>} />
-            <Route path="/chat" element={<PrivateRoute><CommunityChat /></PrivateRoute>} />
-           
-            <Route path="/community" element={<PrivateRoute><CommunityPage /></PrivateRoute>} />
-            <Route path="/simple-community" element={<PrivateRoute><SimpleCommunity /></PrivateRoute>} />
+            
             <Route path="/placement/drive" element={<PrivateRoute><PlacementDrive /></PrivateRoute>} />
             <Route path="/campusconnect" element={<PrivateRoute><CampusConnectPage /></PrivateRoute>} />
+            <Route path="/community" element={<PrivateRoute><CommunityPage /></PrivateRoute>} />
             
             {/* Smart Materials and Events Routes */}
             <Route path="/materials" element={<PrivateRoute><MaterialsPage /></PrivateRoute>} />
@@ -154,7 +153,8 @@ const App = () => {
             <Route path="/quiz/:id" element={<PrivateRoute><QuizPage /></PrivateRoute>} />
 
             {/* Simple Course Route */}
-            <Route path="/simple-course" element={<SimpleCourse />} />
+            <Route path="/simple-course" element={<PrivateRoute><SimpleCourse /></PrivateRoute>} />
+            <Route path="/messages" element={<DirectMessaging />} />
           </Routes>
         </div>
       </div>

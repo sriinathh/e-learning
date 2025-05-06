@@ -76,8 +76,8 @@
   padding: 0.5rem 1rem;
   color: rgba(255, 255, 255, 0.8);
   text-decoration: none;
-  font-weight: 500;
-  font-size: 0.95rem;
+  font-weight: 450;
+  font-size: 0.90rem;
   border-radius: 4px;
   transition: all 0.2s ease;
   position: relative;
@@ -348,4 +348,10 @@
   .courses-toggle {
     width: 100%;
   }
+}
+
+.icon-left {
+  margin-right: 0.5rem;
+  font-size: 0.8rem;
+  vertical-align: middle;
 } 

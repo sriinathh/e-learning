@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { FaBars, FaTimes, FaUserCircle, FaBell, FaGraduationCap, FaCog, FaSignOutAlt, FaChevronDown } from 'react-icons/fa';
+import { FaBars, FaTimes, FaUserCircle, FaBell, FaGraduationCap, FaCog, FaSignOutAlt, FaChevronDown, FaUsers, FaEnvelope } from 'react-icons/fa';
 import './Navbar.css';
 
 const Navbar = () => {
@@ -94,8 +94,15 @@ const Navbar = () => {
           <li className={`navbar-item ${isActive('/events')}`}>
             <Link to="/events" className="navbar-link">Events</Link>
           </li>
-          <li className={`navbar-item ${isActive('/simple-community')}`}>
-            <Link to="/simple-community" className="navbar-link">Community</Link>
+          <li className={`navbar-item ${isActive('/community')}`}>
+            <Link to="/community" className="navbar-link">
+              <FaUsers className="icon-left" /> Community
+            </Link>
+          </li>
+          <li className={`navbar-item ${isActive('/messages')}`}>
+            <Link to="/messages" className="navbar-link">
+              <FaEnvelope className="icon-left" /> Messages
+            </Link>
           </li>
           <li className={`navbar-item ${isActive('/campusconnect')}`}>
             <Link to="/campusconnect" className="navbar-link special">CampusAI</Link>

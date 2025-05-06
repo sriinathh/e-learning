@@ -134,34 +134,32 @@ router.post("/update-profile", async (req, res) => {
     if (username) updateData.username = username;
     if (email) updateData.email = email;
     
-    // Handle profile picture using cloudinary
+    // Handle profile picture
     if (profilePic) {
       try {
-        // Use cloudinary to upload the profile picture
-        const cloudinaryUrl = profilePic; // Store directly for now
-        console.log("Profile picture data received (length):", 
-          profilePic.substring(0, 30) + "..." + 
-          ` (${profilePic.length} characters)`);
-        
-        updateData.profilePic = cloudinaryUrl;
+        // Store the profile picture URL directly
+        updateData.profilePic = profilePic;
+        updateData.profilePicture = profilePic; // For backward compatibility
+        updateData.avatar = profilePic; // For backward compatibility
       } catch (imgError) {
         console.error("Image processing error:", imgError);
         return res.status(400).json({ message: "Invalid image data" });
       }
     }
 
-    // Update the user
+    // Update the user with new data
     const updatedUser = await User.findByIdAndUpdate(
       userId,
-      updateData,
+      { $set: updateData },
       { new: true }
-    ).select("-password"); // Don't return the password
+    ).select("-password");
 
     if (!updatedUser) {
       console.log("User update failed - no user returned from update operation");
       return res.status(404).json({ message: "User update failed" });
     }
 
+    // Update successful
     console.log("User profile updated successfully:", updatedUser._id);
     
     res.status(200).json({

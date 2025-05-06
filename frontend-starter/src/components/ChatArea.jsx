@@ -1,405 +1,495 @@
-import React, { useState, useRef, useEffect } from 'react';
-
-import {
-  Box,
+import React, { useState, useEffect, useRef } from 'react';
+import { 
+  Box, 
+  Flex, 
+  Text, 
+  Input, 
+  Button, 
+  Avatar, 
   VStack,
   HStack,
-  Text,
-  Avatar,
-  Input,
   IconButton,
-  Button,
-  Flex,
-  useColorModeValue,
-  InputGroup,
-  InputRightElement,
-  Menu,
-  MenuButton,
-  MenuList,
-  MenuItem,
+  Heading,
   Divider,
-  Image,
-  Badge,
+  useToast,
   Tooltip,
+  Badge,
+  Spinner,
+  Image
 } from '@chakra-ui/react';
-import {
-  FiSend,
-  FiPaperclip,
-  FiSmile,
-  FiMoreVertical,
-  FiFile,
-  FiDownload,
-  FiCheckCircle,
-  FiCheck,
-  FiX,
-  FiMessageSquare,
-  FiUsers
-} from 'react-icons/fi';
+import { FiSend, FiPaperclip, FiImage, FiSmile, FiMoreHorizontal, FiUser, FiUsers, FiInfo, FiCalendar } from 'react-icons/fi';
+import { getMockMessages } from '../utils/socketService';
 
-const Message = ({ message, currentUser }) => {
-  const isCurrentUser = message.sender?._id === currentUser?.id;
-  const bgColor = useColorModeValue(
-    isCurrentUser ? 'blue.100' : 'gray.100',
-    isCurrentUser ? 'blue.800' : 'gray.700'
-  );
-  const textColor = useColorModeValue(
-    isCurrentUser ? 'gray.800' : 'gray.800',
-    isCurrentUser ? 'white' : 'white'
-  );
-
-  const renderAttachment = () => {
-    if (!message.attachment) return null;
-
-    const { type, url, name, size } = message.attachment;
-
-    if (type.startsWith('image/')) {
-      return (
-        <Image 
-          src={url} 
-          maxH="200px" 
-          borderRadius="md" 
-          mb={2} 
-          objectFit="cover"
-          onClick={() => window.open(url, '_blank')}
-          cursor="pointer"
-        />
-      );
-    }
-
-    if (type.startsWith('video/')) {
-      return (
-        <Box mb={2} borderRadius="md" overflow="hidden" maxW="300px">
-          <video controls width="100%">
-            <source src={url} type={type} />
-            Your browser does not support the video tag.
-          </video>
-        </Box>
-      );
-    }
-
-    // For other file types
-    return (
-      <Flex 
-        p={3} 
-        bg={useColorModeValue('gray.50', 'gray.700')} 
-        borderRadius="md" 
-        mb={2}
-        borderWidth="1px"
-        borderColor={useColorModeValue('gray.200', 'gray.600')}
-        align="center"
-      >
-        <Box 
-          p={2} 
-          borderRadius="md" 
-          bg={useColorModeValue('blue.50', 'blue.900')} 
-          color="blue.500"
-          mr={3}
-        >
-          <Icon as={FiFile} boxSize={6} />
-        </Box>
-        <Box flex={1}>
-          <Text fontWeight="medium" fontSize="sm" noOfLines={1}>{name}</Text>
-          <Text fontSize="xs" color="gray.500">{(size / 1024).toFixed(1)} KB</Text>
-        </Box>
-        <IconButton 
-          icon={<FiDownload />} 
-          size="sm" 
-          variant="ghost" 
-          aria-label="Download file" 
-          as="a"
-          href={url}
-          download={name}
-        />
-      </Flex>
-    );
-  };
-
-  return (
-    <Flex
-      justify={isCurrentUser ? 'flex-end' : 'flex-start'}
-      mb={6}
-      px={6}
-      w="100%"
-    >
-      {!isCurrentUser && (
-        <Avatar 
-          size="md" 
-          name={message.sender?.name} 
-          src={message.sender?.avatar} 
-          mr={3} 
-          mt={1}
-        />
-      )}
-
-      <Flex 
-        maxW={{ base: "85%", md: "75%" }}
-        direction="column"
-        align={isCurrentUser ? 'flex-end' : 'flex-start'}
-      >
-        {!isCurrentUser && (
-          <Text fontSize="sm" fontWeight="bold" mb={1} color="gray.500">
-            {message.sender?.name}
-          </Text>
-        )}
-
-        <Box>
-          {renderAttachment()}
-
-          {message.content && (
-            <Box
-              px={5}
-              py={3}
-              bg={bgColor}
-              color={textColor}
-              borderRadius="lg"
-              boxShadow="sm"
-              fontSize="md"
-            >
-              <Text>{message.content}</Text>
-            </Box>
-          )}
-
-          <HStack spacing={1} mt={1} justify={isCurrentUser ? 'flex-end' : 'flex-start'}>
-            <Text fontSize="xs" color="gray.500">
-              {message.createdAt || '12:00 PM'}
-
-              
-            </Text>
-
-            {isCurrentUser && (
-              <Icon 
-                as={message.isRead ? FiCheckCircle : FiCheck} 
-                color={message.isRead ? 'blue.500' : 'gray.500'} 
-                boxSize={3} 
-              />
-            )}
-          </HStack>
-        </Box>
-      </Flex>
-
-      {isCurrentUser && (
-        <Avatar 
-          size="md" 
-          name={currentUser?.name} 
-          src={currentUser?.avatar} 
-          ml={3} 
-          mt={1}
-        />
-      )}
-    </Flex>
-  );
-};
-
-const ChatArea = ({ currentGroup, messages, onSendMessage, currentUser }) => {
-  const [messageText, setMessageText] = useState('');
+const ChatArea = ({ socket, community, user }) => {
+  const [messages, setMessages] = useState([]);
+  const [newMessage, setNewMessage] = useState('');
+  const [isLoading, setIsLoading] = useState(true);
+  const [typingUsers, setTypingUsers] = useState([]);
+  const [isTyping, setIsTyping] = useState(false);
   const [attachments, setAttachments] = useState([]);
-  const fileInputRef = useRef(null);
+  const [isSending, setIsSending] = useState(false);
+  const [showCommunityInfo, setShowCommunityInfo] = useState(false);
   const messagesEndRef = useRef(null);
-
-  const bgColor = useColorModeValue('gray.50', 'gray.900');
-
-  // Auto-scroll to bottom when messages change
-  useEffect(() => {
+  const fileInputRef = useRef(null);
+  const toast = useToast();
+  
+  // Scroll to bottom when messages change
+  const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+  
+  useEffect(() => {
+    scrollToBottom();
   }, [messages]);
-
-  const handleSendMessage = () => {
-    if (messageText.trim() || attachments.length > 0) {
-      onSendMessage({
-        content: messageText,
-        attachments
+  
+  // Load messages when community changes
+  useEffect(() => {
+    if (socket && community) {
+      setIsLoading(true);
+      setMessages([]); // Clear messages when community changes
+      
+      // Request message history
+      socket.emit('get_community_messages', { communityId: community.id });
+      
+      // Listen for message history
+      socket.on(`community_messages_${community.id}`, (messageHistory) => {
+        setMessages(messageHistory);
+        setIsLoading(false);
+        scrollToBottom();
       });
-      setMessageText('');
-      setAttachments([]);
+      
+      // If no response in 2 seconds, use mock data
+      const timeout = setTimeout(() => {
+        if (isLoading) {
+          const mockMsgs = getMockMessages().map(msg => ({
+            ...msg,
+            communityId: community.id
+          }));
+          setMessages(mockMsgs);
+          setIsLoading(false);
+          scrollToBottom();
+        }
+      }, 2000);
+      
+      // Listen for new messages
+      socket.on('receive_message', (message) => {
+        if (message.communityId === community.id) {
+          console.log('Received message for community:', message);
+          setMessages(prevMessages => [...prevMessages, message]);
+        }
+      });
+      
+      // Listen for typing events
+      socket.on('user_typing', ({ userId, userName, communityId }) => {
+        if (userId !== user.id && communityId === community.id) {
+          setTypingUsers(prev => {
+            if (!prev.find(u => u.id === userId)) {
+              return [...prev, { id: userId, name: userName }];
+            }
+            return prev;
+          });
+          
+          // Clear typing indicator after 3 seconds
+          setTimeout(() => {
+            setTypingUsers(prev => prev.filter(u => u.id !== userId));
+          }, 3000);
+        }
+      });
+      
+      return () => {
+        clearTimeout(timeout);
+        socket.off(`community_messages_${community.id}`);
+        socket.off('receive_message');
+        socket.off('user_typing');
+      };
+    }
+  }, [socket, community, user.id]);
+  
+  // Handle sending messages
+  const handleSendMessage = () => {
+    if ((!newMessage.trim() && attachments.length === 0) || !socket || !community || isSending) return;
+    
+    setIsSending(true);
+    
+    const messageData = {
+      id: Date.now().toString(),
+      text: newMessage.trim(),
+      sender: {
+        id: user.id,
+        name: user.name,
+        avatar: user.avatar
+      },
+      communityId: community.id,
+      timestamp: new Date().toISOString(),
+      attachments: attachments
+    };
+    
+    // Emit message to server
+    socket.emit('send_message', messageData);
+    
+    // Reset inputs
+    setNewMessage('');
+    setAttachments([]);
+    setIsSending(false);
+  };
+  
+  // Handle typing event
+  const handleTyping = (e) => {
+    setNewMessage(e.target.value);
+    
+    if (!isTyping && socket && community) {
+      setIsTyping(true);
+      socket.emit('typing', { 
+        userId: user.id, 
+        userName: user.name,
+        communityId: community.id 
+      });
+      
+      // Reset typing status after 3 seconds
+      setTimeout(() => {
+        setIsTyping(false);
+      }, 3000);
     }
   };
-
-  const handleKeyPress = (e) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      handleSendMessage();
-    }
+  
+  // Handle attachment selection
+  const handleAttachmentClick = () => {
+    fileInputRef.current.click();
   };
-
+  
   const handleFileChange = (e) => {
     const files = Array.from(e.target.files);
-
-    files.forEach(file => {
-      const reader = new FileReader();
-
-      reader.onloadend = () => {
-        setAttachments(prev => [...prev, {
-          type: file.type,
-          url: reader.result,
-          name: file.name,
-          size: file.size
-        }]);
-      };
-
-      reader.readAsDataURL(file);
-    });
-
-    // Reset file input
-    if (fileInputRef.current) {
-      fileInputRef.current.value = '';
+    
+    if (files.length > 0) {
+      // Mock file upload - in a real app, you'd upload to server
+      const newAttachments = files.map(file => ({
+        id: Date.now() + Math.random().toString(36).substring(2),
+        name: file.name,
+        type: file.type,
+        size: file.size,
+        url: URL.createObjectURL(file)
+      }));
+      
+      setAttachments([...attachments, ...newAttachments]);
+      
+      toast({
+        title: 'File attached',
+        description: `${files.length} file(s) ready to send`,
+        status: 'success',
+        duration: 3000,
+        isClosable: true,
+      });
     }
   };
+  
+  const formatTime = (timestamp) => {
+    const date = new Date(timestamp);
+    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  };
+
+  const formatDate = (timestamp) => {
+    const date = new Date(timestamp);
+    return date.toLocaleDateString('en-US', { 
+      year: 'numeric', 
+      month: 'short', 
+      day: 'numeric' 
+    });
+  };
+
+  // Group messages by date
+  const groupedMessages = messages.reduce((groups, message) => {
+    const date = new Date(message.timestamp).toDateString();
+    if (!groups[date]) {
+      groups[date] = [];
+    }
+    groups[date].push(message);
+    return groups;
+  }, {});
 
   return (
-    <Flex 
-      flex="1"
-      height="100%"
-      direction="column" 
-      bg="white" 
-      borderLeft="1px" 
-      borderColor="gray.200"
-      overflow="hidden"
-      className="community-chat-container"
-    >
-      {currentGroup ? (
-        <>
-          {/* Chat Header */}
-          <Flex 
-            px={8} 
-            py={4} 
-            borderBottom="1px solid" 
-            borderColor={useColorModeValue('gray.200', 'gray.700')}
-            bg={useColorModeValue('white', 'gray.800')}
-            align="center"
-          >
-            <Avatar 
-              size="md" 
-              name={currentGroup.name} 
-              src={currentGroup.avatar} 
-              bg={`${currentGroup.color}.400`}
-              mr={4}
-            />
-
-            <Box flex={1}>
-              <HStack>
-                <Text fontWeight="bold" fontSize="lg">{currentGroup.name}</Text>
-                <Badge colorScheme={currentGroup.isPrivate ? 'red' : 'green'} ml={1}>
-                  {currentGroup.isPrivate ? 'Private' : 'Public'}
-                </Badge>
-              </HStack>
-              <Text fontSize="sm" color="gray.500">
-                {currentGroup.memberCount || (currentGroup.members || []).length} members • {currentGroup.activeUsers || 0} online
-              </Text>
-            </Box>
-
-            <Menu>
-              <MenuButton
-                as={IconButton}
-                icon={<FiMoreVertical />}
-                variant="ghost"
-                aria-label="More options"
-              />
-              <MenuList>
-                <MenuItem>View Group Info</MenuItem>
-                <MenuItem>Add Member</MenuItem>
-                <MenuItem>Search in Chat</MenuItem>
-                <Divider />
-                <MenuItem color="red.500">
-                  {currentGroup.isMember ? 'Leave Group' : 'Report Group'}
-                </MenuItem>
-              </MenuList>
-            </Menu>
-          </Flex>
-
-          {/* Messages Area */}
-          <Box 
-            flex={1}
-            overflowY="auto"
-            py={6}
-            px={2}
-          >
-            {messages.length === 0 ? (
-              <Flex direction="column" align="center" justify="center" h="100%" p={10}>
-                <Avatar 
-                  size="xl" 
-                  icon={<FiMessageSquare />} 
-                  mb={4}
-                  bg={useColorModeValue('blue.400', 'blue.600')}
-                />
-                <Text fontSize="xl" color="gray.500">No messages yet...</Text>
-              </Flex>
-            ) : (
-              <VStack align="stretch" spacing={4}>
-                {messages.map((message, idx) => (
-                  <Message 
-                    key={idx} 
-                    message={message} 
-                    currentUser={currentUser} 
-                  />
-                ))}
-              </VStack>
-            )}
-            <div ref={messagesEndRef} />
+    <Box position="relative" h="100%">
+      {/* Chat header */}
+      <Flex 
+        p={4} 
+        bg="white" 
+        borderBottomWidth="1px" 
+        borderColor="gray.200"
+        justify="space-between"
+        align="center"
+      >
+        <HStack spacing={3}>
+          <Avatar 
+            size="md" 
+            name={community?.name} 
+            src={community?.photo}
+            bg="teal.500"
+          />
+          <Box>
+            <Heading size="md">{community?.name}</Heading>
+            <HStack spacing={2} color="gray.500" fontSize="sm">
+              <FiUsers />
+              <Text>{community?.members} members</Text>
+              {community?.createdAt && (
+                <>
+                  <Text>•</Text>
+                  <FiCalendar size={14} />
+                  <Text>Created {formatDate(community.createdAt)}</Text>
+                </>
+              )}
+            </HStack>
           </Box>
-
-          {/* Message Input Area */}
-          <Box 
-            p={4}
-            borderTop="1px solid" 
-            borderColor={useColorModeValue('gray.200', 'gray.700')}
-            bg={bgColor}
-          >
+        </HStack>
+        
+        <HStack>
+          <Badge colorScheme="green" px={2} py={1} borderRadius="full">
+            {community?.isJoined ? 'Joined' : 'Not Joined'}
+          </Badge>
+          <Tooltip label="Community info">
+            <IconButton
+              icon={<FiInfo />}
+              variant="ghost"
+              aria-label="Community info"
+              onClick={() => setShowCommunityInfo(!showCommunityInfo)}
+            />
+          </Tooltip>
+        </HStack>
+      </Flex>
+      
+      {/* Community info drawer */}
+      {showCommunityInfo && (
+        <Box 
+          position="absolute" 
+          top="73px" 
+          right="0" 
+          w="300px" 
+          bg="white" 
+          zIndex="10"
+          boxShadow="md"
+          borderWidth="1px"
+          borderColor="gray.200"
+          p={4}
+          borderBottomLeftRadius="md"
+        >
+          <VStack align="start" spacing={4}>
+            <Heading size="sm">About this community</Heading>
+            {community?.description && (
+              <Text fontSize="sm">{community.description}</Text>
+            )}
+            <Divider />
             <HStack>
-              <InputGroup>
-                <Input
-                  placeholder="Type a message..."
-                  value={messageText}
-                  onChange={(e) => setMessageText(e.target.value)}
-                  onKeyDown={handleKeyPress}
-                  variant="filled"
+              <FiUsers />
+              <Text fontSize="sm">{community?.members} members</Text>
+            </HStack>
+            {community?.createdAt && (
+              <HStack>
+                <FiCalendar />
+                <Text fontSize="sm">Created on {formatDate(community.createdAt)}</Text>
+              </HStack>
+            )}
+            {community?.createdBy && (
+              <HStack>
+                <FiUser />
+                <Text fontSize="sm">Created by {community.createdBy === user.id ? 'you' : 'another user'}</Text>
+              </HStack>
+            )}
+          </VStack>
+        </Box>
+      )}
+      
+      {/* Messages area */}
+      <Box className="message-list">
+        {isLoading ? (
+          <Flex justify="center" align="center" h="100%">
+            <Spinner size="xl" color="teal.500" />
+          </Flex>
+        ) : (
+          <VStack spacing={6} align="stretch">
+            {/* Grouped messages by date */}
+            {Object.entries(groupedMessages).map(([date, dateMessages]) => (
+              <Box key={date}>
+                <Flex justify="center" my={4}>
+                  <Badge px={2} py={1} borderRadius="full" bg="gray.100">
+                    {new Date(date).toLocaleDateString('en-US', { 
+                      weekday: 'long', 
+                      month: 'short',
+                      day: 'numeric'
+                    })}
+                  </Badge>
+                </Flex>
+                
+                <VStack spacing={4} align="stretch">
+                  {dateMessages.map((message) => {
+                    const isSentByMe = message.sender.id === user.id;
+                    
+                    return (
+                      <Flex 
+                        key={message.id} 
+                        className="message-item"
+                        justify={isSentByMe ? "flex-end" : "flex-start"}
+                      >
+                        {/* Horizontal message layout */}
+                        <Flex 
+                          maxW="70%" 
+                          direction="row" 
+                          alignItems="flex-start"
+                        >
+                          {/* Avatar - only show for received messages */}
+                          {!isSentByMe && (
+                            <Avatar 
+                              size="sm" 
+                              name={message.sender.name} 
+                              src={message.sender.avatar} 
+                              mr={2}
+                              mt={1}
+                            />
+                          )}
+                          
+                          <Box>
+                            {/* Sender name - only for received messages */}
+                            {!isSentByMe && (
+                              <Text fontSize="xs" fontWeight="bold" ml={1} mb={1}>
+                                {message.sender.name}
+                              </Text>
+                            )}
+                            
+                            <Box 
+                              className={`message-bubble ${isSentByMe ? 'sent' : 'received'}`}
+                              boxShadow="sm"
+                            >
+                              <Text>{message.text}</Text>
+                              
+                              {/* Display attachments if any */}
+                              {message.attachments && message.attachments.length > 0 && (
+                                <VStack mt={2} spacing={1} align="stretch">
+                                  {message.attachments.map(file => (
+                                    <Box 
+                                      key={file.id}
+                                      p={2}
+                                      bg="gray.50"
+                                      borderRadius="md"
+                                      fontSize="sm"
+                                    >
+                                      <Text>{file.name}</Text>
+                                      {file.type.startsWith('image/') && file.url && (
+                                        <Box mt={2}>
+                                          <Image 
+                                            src={file.url} 
+                                            alt={file.name}
+                                            borderRadius="md"
+                                            maxH="200px"
+                                            objectFit="cover"
+                                          />
+                                        </Box>
+                                      )}
+                                    </Box>
+                                  ))}
+                                </VStack>
+                              )}
+                              
+                              <Text className="message-time">
+                                {formatTime(message.timestamp)}
+                              </Text>
+                            </Box>
+                          </Box>
+                        </Flex>
+                      </Flex>
+                    );
+                  })}
+                </VStack>
+              </Box>
+            ))}
+            
+            {/* Typing indicator */}
+            {typingUsers.length > 0 && (
+              <HStack className="typing-indicator">
+                <Text fontSize="xs">{typingUsers[0].name} is typing</Text>
+                <span className="typing-dot"></span>
+                <span className="typing-dot"></span>
+                <span className="typing-dot"></span>
+              </HStack>
+            )}
+            
+            {/* Anchor for auto-scrolling */}
+            <div ref={messagesEndRef} />
+          </VStack>
+        )}
+      </Box>
+      
+      {/* Message input */}
+      {community?.isJoined ? (
+        <Box className="message-input-container">
+          {/* Display selected attachments */}
+          {attachments.length > 0 && (
+            <Flex wrap="wrap" mb={2}>
+              {attachments.map(file => (
+                <Badge 
+                  key={file.id} 
+                  colorScheme="teal" 
+                  m={1} 
+                  p={2} 
                   borderRadius="full"
-                  pr="4.5rem"
-                />
-                <InputRightElement>
-                  <HStack spacing={4}>
-                    <Tooltip label="Attach file">
-                      <IconButton
-                        icon={<FiPaperclip />}
-                        variant="ghost"
-                        onClick={() => fileInputRef.current?.click()}
-                        aria-label="Attach file"
-                      />
-                    </Tooltip>
-                    <Tooltip label="Send message">
-                      <IconButton
-                        icon={<FiSend />}
-                        variant="solid"
-                        colorScheme="blue"
-                        onClick={handleSendMessage}
-                        aria-label="Send message"
-                      />
-                    </Tooltip>
-                  </HStack>
-                </InputRightElement>
-              </InputGroup>
+                >
+                  {file.name}
+                </Badge>
+              ))}
+            </Flex>
+          )}
+          
+          <Flex position="relative">
+            <Input
+              placeholder="Type a message..."
+              value={newMessage}
+              onChange={handleTyping}
+              onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+              pr="4.5rem"
+              className="message-input"
+            />
+            
+            <HStack position="absolute" right="0" h="100%" pr={2}>
               <input
                 type="file"
                 ref={fileInputRef}
-                style={{ display: 'none' }}
                 onChange={handleFileChange}
+                style={{ display: 'none' }}
                 multiple
               />
+              
+              <Tooltip label="Attach files">
+                <IconButton
+                  icon={<FiPaperclip />}
+                  aria-label="Attach files"
+                  variant="ghost"
+                  onClick={handleAttachmentClick}
+                />
+              </Tooltip>
+              
+              <Tooltip label="Send message">
+                <IconButton
+                  icon={<FiSend />}
+                  colorScheme="teal"
+                  variant="solid"
+                  aria-label="Send message"
+                  onClick={handleSendMessage}
+                  isLoading={isSending}
+                  className="send-button"
+                />
+              </Tooltip>
             </HStack>
-          </Box>
-        </>
+          </Flex>
+        </Box>
       ) : (
         <Flex 
-          justify="center" 
-          align="center" 
-          height="100%" 
-          p={10} 
-          direction="column"
+          p={4} 
+          bg="gray.50" 
+          borderTopWidth="1px" 
+          borderColor="gray.200"
+          justify="center"
         >
-          <Text fontSize="lg" color="gray.500">Select a group to start chatting</Text>
+          <Text color="gray.500">Join this community to send messages</Text>
         </Flex>
       )}
-    </Flex>
+    </Box>
   );
 };
 
-export default ChatArea;
+export default ChatArea; 

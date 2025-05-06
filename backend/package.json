@@ -1,7 +1,7 @@
 {
   "name": "backend",
   "version": "1.0.0",
-  "description": "",
+  "description": "This document provides instructions on how to set up and use the Mistral AI integration for the CampusConnect feature in the e-learning platform.",
   "main": "index.js",
   "scripts": {
     "start": "node server.js",
@@ -27,5 +27,6 @@
     "multer-storage-cloudinary": "^4.0.0",
     "nodemon": "^3.1.9",
     "socket.io": "^4.8.1"
-  }
+  },
+  "devDependencies": {}
 }

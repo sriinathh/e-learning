@@ -1,13 +1,11 @@
 import React, { createContext, useState, useEffect, useContext } from 'react';
-import { io } from 'socket.io-client';
+import { getSocket, disconnectSocket, toggleMockMode } from '../utils/socketService';
+import { getMockUser } from '../utils/mockUser';
 
 const SocketContext = createContext();
 
-// Hardcoded socket URL - ensure your backend is running on this port
-const SOCKET_URL = 'http://localhost:5000';
-
-// Development mode flag to bypass socket connection issues
-const BYPASS_SOCKET = true; // Set to true to prevent socket connection attempts
+// Set to false to try real connection, true to force mock mode
+const FORCE_MOCK_MODE = true;
 
 export function useSocket() {
   return useContext(SocketContext);
@@ -19,139 +17,118 @@ export const SocketProvider = ({ children }) => {
   const [connectionError, setConnectionError] = useState(false);
   const [onlineUsers, setOnlineUsers] = useState({});
   
+  // Initialize socket connection
   useEffect(() => {
-    let socketInstance;
-    let reconnectTimer;
-    let reconnectAttempts = 0;
-    const maxReconnectAttempts = 3; // Reduced from 5 to fail faster
-    
-    // Skip socket connection in bypass mode
-    if (BYPASS_SOCKET) {
-      // Don't log anything - silent bypass
-      return;
+    // Force mock mode if needed
+    if (FORCE_MOCK_MODE) {
+      toggleMockMode(true);
     }
-
-    const connectSocket = () => {
+    
+    // Get current user
+    const user = getMockUser();
+    
+    if (user && !socket) {
       try {
-        // Clear any previous error state
-        setConnectionError(false);
-        
-        // Create socket connection with error handling
-        socketInstance = io(SOCKET_URL, {
-          reconnectionAttempts: 3,
-          timeout: 5000, // Reduced timeout
-          transports: ['websocket', 'polling']
-        });
-        
-        socketInstance.on('connect', () => {
-          console.log('Socket connected successfully');
-          setConnected(true);
-          reconnectAttempts = 0;
-          
-          // Log in the current user if available
-          try {
-            const userString = localStorage.getItem('user');
-            if (userString) {
-              const user = JSON.parse(userString);
-              if (user && user._id) {
-                socketInstance.emit('login', user._id);
-              }
-            }
-          } catch (error) {
-            console.error('Error parsing user data:', error);
-          }
-        });
-        
-        socketInstance.on('disconnect', () => {
-          console.log('Socket disconnected');
-          setConnected(false);
-        });
-        
-        socketInstance.on('connect_error', (error) => {
-          console.error('Socket connection error:', error);
-          setConnected(false);
-          setConnectionError(true);
-          
-          // Try to reconnect a limited number of times
-          if (reconnectAttempts < maxReconnectAttempts) {
-            reconnectAttempts++;
-            console.log(`Reconnection attempt ${reconnectAttempts}/${maxReconnectAttempts} in 5 seconds...`);
-            reconnectTimer = setTimeout(connectSocket, 5000);
-          } else {
-            console.log('Max reconnection attempts reached. Running in offline mode.');
-          }
-        });
-        
-        // Track user status changes
-        socketInstance.on('userStatusChange', ({ userId, status }) => {
-          setOnlineUsers(prev => ({
-            ...prev,
-            [userId]: status === 'online'
-          }));
-        });
-        
+        // Initialize socket with user info
+        const socketInstance = getSocket(user.id, user.name || user.username);
         setSocket(socketInstance);
+        setConnected(true);
+        
+        // Listen for online users updates
+        socketInstance.on('users_status', (usersData) => {
+          const formattedUsers = {};
+          usersData.forEach(user => {
+            formattedUsers[user.id] = user.status === 'online';
+          });
+          setOnlineUsers(formattedUsers);
+        });
+
+        // Emit a user_connected event to register this user
+        socketInstance.emit('user_connected', {
+          userId: user.id,
+          userData: {
+            id: user.id,
+            name: user.name || user.username,
+            avatar: user.avatar,
+            email: user.email,
+            status: 'online'
+          }
+        });
+        
       } catch (error) {
-        console.error('Error initializing socket:', error);
+        console.error('Socket initialization error:', error);
         setConnectionError(true);
       }
-    };
+    }
     
-    // Initialize connection
-    connectSocket();
-    
-    // Cleanup on unmount
+    // Cleanup function
     return () => {
-      if (socketInstance) {
-        socketInstance.disconnect();
-      }
-      if (reconnectTimer) {
-        clearTimeout(reconnectTimer);
-      }
+      // Only disconnect when component unmounts
+      // disconnectSocket();
     };
   }, []);
   
-  // Create mock implementations for socket methods when in bypass mode
+  // Socket methods
   const joinCommunity = (communityId) => {
-    if (socket && connected) {
-      socket.emit('joinCommunity', communityId);
+    if (socket) {
+      const user = getMockUser();
+      if (user) {
+        socket.emit('join_community', { 
+          userId: user.id, 
+          communityId,
+          userInfo: {
+            id: user.id,
+            name: user.name || user.username,
+            avatar: user.avatar,
+            email: user.email
+          }
+        });
+        return true;
+      }
     }
-    // In bypass mode, do nothing but don't error
+    return false;
   };
   
   const leaveCommunity = (communityId) => {
-    if (socket && connected) {
-      socket.emit('leaveCommunity', communityId);
+    if (socket) {
+      const user = getMockUser();
+      socket.emit('leave_community', { userId: user?.id, communityId });
+      return true;
     }
-    // In bypass mode, do nothing but don't error
+    return false;
   };
   
   const sendCommunityMessage = (message) => {
-    if (socket && connected) {
-      socket.emit('sendCommunityMessage', message);
+    if (socket) {
+      socket.emit('send_message', message);
+      return true;
     }
-    // In bypass mode, do nothing but don't error
+    return false;
   };
   
   const sendDirectMessage = (message) => {
-    if (socket && connected) {
-      socket.emit('sendDirectMessage', message);
+    if (socket) {
+      socket.emit('send_direct_message', message);
+      return true;
     }
-    // In bypass mode, do nothing but don't error
+    return false;
   };
   
   const sendTypingIndicator = (data) => {
-    if (socket && connected) {
+    if (socket) {
       socket.emit('typing', data);
+      return true;
     }
-    // In bypass mode, do nothing but don't error
+    return false;
   };
   
   const logout = () => {
-    if (socket && connected) {
-      socket.emit('logout');
+    if (socket) {
+      const user = getMockUser();
+      socket.emit('logout', { userId: user?.id });
+      return true;
     }
-    // In bypass mode, do nothing but don't error
+    return false;
   };
   
   const value = {

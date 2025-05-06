@@ -103,7 +103,7 @@ const LandingPage = () => {
                   zIndex: -1,
                 }}
               >
-                <b>EduConnect</b>
+                <b>CampusConnect</b>
               </Text>
               <br />
               <Text as="span" color="teal.400">

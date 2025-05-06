@@ -254,41 +254,94 @@ const useChatStore = create((set, get) => ({
     set({ currentGroup: null, messages: [] });
   },
 
-  // Local mock data for development
+  // Local data getters - For development and demo purposes
   getLocalUsers: () => {
-    return [
-      { _id: 1, username: "Srinath", isOnline: true },
-      { _id: 2, username: "Rakesh", isOnline: true },
-      { _id: 3, username: "Bharath", isOnline: false },
-      { _id: 4, username: useAuthStore.getState().authUser?.username || "You", isOnline: true },
-    ];
+    // Get the current user from localStorage
+    let currentUser = null;
+    try {
+      const storedUser = localStorage.getItem('user');
+      if (storedUser) {
+        currentUser = JSON.parse(storedUser);
+        // Add required fields for consistency
+        currentUser.isOnline = true;
+        currentUser.isReal = true;
+      }
+    } catch (error) {
+      console.error('Error parsing user from localStorage:', error);
+    }
+
+    // Only use real users from communityUsers in localStorage
+    let communityUsers = [];
+    try {
+      const storedUsers = localStorage.getItem('communityUsers');
+      if (storedUsers) {
+        // Parse stored users and filter out any without isReal flag
+        const parsedUsers = JSON.parse(storedUsers);
+        communityUsers = parsedUsers.filter(user => 
+          user.isReal === true && (!currentUser || user._id !== currentUser._id)
+        );
+      }
+    } catch (error) {
+      console.error('Error getting community users:', error);
+    }
+
+    // Create the final list with current user first
+    let finalUsers = [];
+    
+    // Add current user if available
+    if (currentUser) {
+      finalUsers.push({
+        _id: currentUser._id,
+        username: currentUser.username || currentUser.name,
+        isOnline: true,
+        profilePic: currentUser.profilePic || currentUser.profilePicture || 
+          `https://ui-avatars.com/api/?name=${encodeURIComponent(currentUser.username || currentUser.name)}&background=random`,
+        isReal: true
+      });
+    }
+    
+    // Add other users
+    finalUsers = [...finalUsers, ...communityUsers];
+    
+    return finalUsers;
   },
 
   getLocalMessages: () => {
     const user = useAuthStore.getState().authUser;
-    return [
-      {
-        id: 1,
-        content: "Hey everyone! Welcome to the community chat!",
-        sender: { username: "Srinath", _id: "1" },
-        createdAt: "10:30 AM",
-        isCurrentUser: false,
-      },
-      {
-        id: 2,
-        content: "Great to see this feature added to EduConnect 🚀",
-        sender: { username: "Rakesh", _id: "2" },
-        createdAt: "10:31 AM",
-        isCurrentUser: false,
-      },
-      {
-        id: 3,
-        content: "How is everyone doing today?",
-        sender: { username: user?.username || "You", _id: user?._id || "current" },
-        createdAt: "10:32 AM",
-        isCurrentUser: true,
-      },
-    ];
+    
+    // Create a welcome message from the current user or system
+    if (user) {
+      return [
+        {
+          id: 'welcome-' + Date.now(),
+          content: "Welcome to the community chat! Connect with other learners here.",
+          sender: { 
+            username: user.username || user.name, 
+            _id: user._id,
+            profilePic: user.profilePic || user.profilePicture
+          },
+          createdAt: new Date().toLocaleTimeString([], {
+            hour: "2-digit",
+            minute: "2-digit",
+          }),
+          isCurrentUser: true,
+        }
+      ];
+    } else {
+      // System message if no user is logged in
+      return [
+        {
+          id: 'welcome-system',
+          content: "Welcome to the community chat! Please log in to join the conversation.",
+          sender: { username: "System", _id: "system" },
+          createdAt: new Date().toLocaleTimeString([], {
+            hour: "2-digit",
+            minute: "2-digit",
+          }),
+          isCurrentUser: false,
+        }
+      ];
+    }
   },
 
   getLocalGroups: () => {

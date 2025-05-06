@@ -125,6 +125,33 @@ const Home = () => {
         </div>
       </section>
 
+      {/* Feature Navigation Section */}
+      <section className="feature-navigation fade-in">
+        <h2>Quick Access</h2>
+        <div className="feature-list">
+          <Link to="/simple-course" className="feature-card">
+            <div className="feature-icon">📚</div>
+            <h3>Course Management System</h3>
+            <p>Manage academic and faculty modules efficiently</p>
+          </Link>
+          <Link to="/placement" className="feature-card">
+            <div className="feature-icon">💼</div>
+            <h3>Placement Hub</h3>
+            <p>Access job opportunities and placement resources</p>
+          </Link>
+          <Link to="/community" className="feature-card">
+            <div className="feature-icon">👥</div>
+            <h3>Community</h3>
+            <p>Connect with peers and join discussions</p>
+          </Link>
+          <Link to="/messages" className="feature-card">
+            <div className="feature-icon">💬</div>
+            <h3>Messages</h3>
+            <p>Direct messaging with students and faculty</p>
+          </Link>
+        </div>
+      </section>
+
       {/* Testimonials Section */}
       <section className="testimonials fade-in-delay">
         <h2>What Our Students Say</h2>

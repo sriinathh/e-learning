@@ -1,0 +1,106 @@
+.career-roadmap-container {
+  background-color: white;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  padding: 2rem;
+  margin: 1rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.career-select-container {
+  background-color: #f8fafc;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+/* Animation for skill tags */
+.career-roadmap-container .chakra-tag {
+  transition: all 0.3s ease;
+}
+
+.career-roadmap-container .chakra-tag:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Step card hover effect */
+.career-roadmap-container .chakra-card {
+  transition: all 0.3s ease;
+}
+
+.career-roadmap-container .chakra-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.08);
+}
+
+/* Progress bar animation */
+@keyframes growProgress {
+  0% {
+    width: 0%;
+  }
+}
+
+.career-roadmap-container .chakra-progress {
+  animation: growProgress 1.5s ease-out;
+}
+
+/* Points indicator pulse */
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.career-roadmap-container .pulse-effect {
+  animation: pulse 2s infinite;
+}
+
+/* Achievement icons scale effect */
+.career-roadmap-container .achievement-icon {
+  transition: transform 0.3s ease;
+}
+
+.career-roadmap-container .achievement-icon:hover {
+  transform: scale(1.1);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .career-roadmap-container {
+    padding: 1rem;
+  }
+  
+  .career-select-container {
+    padding: 1rem;
+  }
+}
+
+/* Custom scrollbar */
+.career-roadmap-container::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.career-roadmap-container::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+.career-roadmap-container::-webkit-scrollbar-thumb {
+  background: #cbd5e0;
+  border-radius: 4px;
+}
+
+.career-roadmap-container::-webkit-scrollbar-thumb:hover {
+  background: #a0aec0;
+} 
