@@ -33,7 +33,7 @@ const SidebarNav = ({
     <nav className={`sidebar-nav ${isOpen ? "open" : ""}`}>
       <div className="sidebar-header">
         <Link to="/" className="sidebar-logo">
-          <FaGraduationCap /> EduConnect
+          <FaGraduationCap /> CampusConnect
         </Link>
       </div>
 
@@ -124,7 +124,7 @@ const SidebarNav = ({
       </div>
 
       <div className="sidebar-footer">
-        <p>© 2023 EduConnect</p>
+        <p> CampusConnect © 2025</p>
         <p>Elevate Your Learning</p>
       </div>
     </nav>

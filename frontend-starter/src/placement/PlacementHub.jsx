@@ -59,7 +59,7 @@ const PlacementHub = () => {
             fontWeight="bold"
             textShadow="2px 2px 4px rgba(0,0,0,0.2)"
           >
-            Welcome to EduConnect Placement Hub
+            Welcome to CampusConnect Placement Hub
           </Heading>
 
           <Box 

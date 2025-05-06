@@ -307,7 +307,8 @@ const ProfilePage = () => {
                     },
                     {
                       headers: {
-                        'Content-Type': 'application/json'
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
                       },
                       timeout: 10000 // 10 second timeout
                     }
@@ -316,13 +317,33 @@ const ProfilePage = () => {
                   console.log("Server response:", response.data);
                   
                   if (response && response.data && response.data.user) {
-                    // Update the user in local state and localStorage
-                    setUser(response.data.user);
-                    localStorage.setItem("user", JSON.stringify(response.data.user));
+                    // Update both local state and localStorage with the complete user data
+                    const updatedUser = {
+                      ...response.data.user,
+                      profilePic: response.data.user.profilePic,
+                      profilePicture: response.data.user.profilePic,
+                      avatar: response.data.user.profilePic
+                    };
+                    
+                    setUser(updatedUser);
+                    localStorage.setItem("user", JSON.stringify(updatedUser));
+                    
+                    // Update community user data if it exists
+                    try {
+                      const communityUsers = JSON.parse(localStorage.getItem("communityUsers")) || [];
+                      const updatedCommunityUsers = communityUsers.map(u => 
+                        u._id === userId 
+                          ? { ...u, profilePic: response.data.user.profilePic }
+                          : u
+                      );
+                      localStorage.setItem("communityUsers", JSON.stringify(updatedCommunityUsers));
+                    } catch (communityError) {
+                      console.error("Error updating community user:", communityError);
+                    }
                     
                     toast({
                       title: "Success",
-                      description: "Profile picture updated permanently in database",
+                      description: "Profile picture updated successfully",
                       status: "success",
                       duration: 3000,
                       isClosable: true,
@@ -333,27 +354,20 @@ const ProfilePage = () => {
                 } catch (apiError) {
                   console.error("API error details:", apiError);
                   
+                  // Handle server connection issues
                   if (apiError.message === "Server unavailable") {
-                    // Handle server connection issues
                     toast({
                       title: "Server connection failed",
-                      description: "Could not connect to the database server. Starting the server may solve this issue.",
+                      description: "Could not connect to the database server. Please try again later.",
                       status: "error",
                       duration: 5000,
                       isClosable: true,
                     });
                   } else {
-                    // Add detailed error message for debugging
-                    const errorDetails = apiError.response?.data?.message || 
-                                       apiError.message || 
-                                       "Unknown server error";
-                    
-                    console.log(`Server error details: ${errorDetails}`);
-                    
                     toast({
-                      title: "Database update failed",
-                      description: `Could not save to database: ${errorDetails}. Your picture has been saved locally only.`,
-                      status: "warning",
+                      title: "Update failed",
+                      description: apiError.response?.data?.message || apiError.message || "Failed to update profile picture",
+                      status: "error",
                       duration: 5000,
                       isClosable: true,
                     });
@@ -369,25 +383,21 @@ const ProfilePage = () => {
                   
                   localStorage.setItem("user", JSON.stringify(updatedUser));
                   setUser(updatedUser);
+                  
+                  toast({
+                    title: "Local update only",
+                    description: "Profile picture saved locally. Changes will be temporary.",
+                    status: "warning",
+                    duration: 5000,
+                    isClosable: true,
+                  });
                 }
               } else {
-                console.log("Missing valid user ID, saving only locally");
-                
-                // Local-only update when no valid ID exists
-                const updatedUser = { 
-                  ...userData,
-                  profilePic: resizedImage,
-                  profilePicture: resizedImage,
-                  avatar: resizedImage
-                };
-                
-                localStorage.setItem("user", JSON.stringify(updatedUser));
-                setUser(updatedUser);
-                
+                console.log("No valid user ID found");
                 toast({
-                  title: "Profile picture updated locally",
-                  description: "No valid user ID found - your picture has been saved locally only. Please try logging in again.",
-                  status: "info",
+                  title: "Authentication required",
+                  description: "Please log out and log in again to update your profile picture permanently.",
+                  status: "warning",
                   duration: 5000,
                   isClosable: true,
                 });

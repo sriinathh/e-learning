@@ -24,11 +24,12 @@ import {
   IconButton,
   ScaleFade
 } from '@chakra-ui/react';
-import { FaEye, FaEyeSlash, FaSignInAlt, FaGoogle, FaUniversity } from 'react-icons/fa';
+import { FaEye, FaEyeSlash, FaSignInAlt, FaGoogle, FaUniversity, FaFacebook } from 'react-icons/fa';
 import { FiLogIn, FiMail, FiLock, FiEye, FiEyeOff } from 'react-icons/fi';
 import axios from 'axios';
 import { keyframes } from '@emotion/react';
 import { motion } from 'framer-motion';
+import { toast } from 'react-toastify';
 
 // Create motion components
 const MotionBox = motion(Box);
@@ -87,68 +88,35 @@ const Login = () => {
       }
       
       // Make the actual login request
-      const response = await axios.post('http://localhost:5001/api/users/login', {
+      const response = await axios.post('http://localhost:5001/api/auth/login', {
         email,
         password
       });
       
       if (response.data) {
-        // Ensure user data has the correct format for MongoDB
-        const userData = {
-          ...response.data,
-          _id: response.data._id || response.data.userId, // Ensure _id exists
-          hasCustomAvatar: !!response.data.profilePic
-        };
+        // Store user data in localStorage
+        localStorage.setItem('token', response.data.token);
+        localStorage.setItem('user', JSON.stringify(response.data.user));
         
-        console.log('Login successful, user data:', userData);
+        // Get user's name from response
+        const userName = response.data.user.name || response.data.user.username || email.split('@')[0];
         
-        // Store in localStorage
-        localStorage.setItem('user', JSON.stringify(userData));
-        
-        // Initialize communityUsers if not already set
-        try {
-          let communityUsers = [];
-          const storedUsers = localStorage.getItem('communityUsers');
-          
-          if (storedUsers) {
-            communityUsers = JSON.parse(storedUsers);
-          }
-          
-          // Check if current user exists in community
-          const userExists = communityUsers.some(user => user._id === userData._id);
-          
-          if (!userExists) {
-            // Add current user to community
-            communityUsers.push({
-              _id: userData._id,
-              username: userData.username || userData.name,
-              isOnline: true,
-              profilePic: userData.profilePic || userData.profilePicture || 
-                `https://ui-avatars.com/api/?name=${encodeURIComponent(userData.username || userData.name)}&background=random`,
-              isReal: true,
-              joinedAt: new Date().toISOString()
-            });
-            
-            // Store updated community users
-            localStorage.setItem('communityUsers', JSON.stringify(communityUsers));
-          }
-        } catch (error) {
-          console.error('Error initializing community users:', error);
-        }
-        
-        // Show success message
+        // Show success message with username
         toast({
-          title: 'Login Successful',
-          description: `Welcome, ${userData.username || userData.name}!`,
+          title: '👋 Welcome back!',
+          description: `Great to see you again, ${userName}! Ready to continue learning?`,
           status: 'success',
-          duration: 3000,
-          isClosable: true
+          duration: 5000,
+          isClosable: true,
+          position: 'bottom',
+          containerStyle: {
+            maxWidth: '500px',
+            margin: '0 auto'
+          }
         });
         
         // Redirect to home page
         navigate('/home');
-      } else {
-        throw new Error('Invalid response from server');
       }
     } catch (error) {
       console.error('Login error:', error);
@@ -161,11 +129,20 @@ const Login = () => {
         description: errorMessage,
         status: 'error',
         duration: 3000,
-        isClosable: true
+        isClosable: true,
+        position: 'top-right'
       });
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleEmailChange = (e) => {
+    setEmail(e.target.value);
+  };
+
+  const handlePasswordChange = (e) => {
+    setPassword(e.target.value);
   };
 
   const handleGoogleLogin = () => {
@@ -362,7 +339,7 @@ const Login = () => {
                 <InputGroup>
                   <Input
                     value={email}
-                    onChange={(e) => setEmail(e.target.value)}
+                    onChange={handleEmailChange}
                     type="email"
                     placeholder="Your email address"
                     bg="gray.50"
@@ -381,7 +358,7 @@ const Login = () => {
                 <InputGroup>
                   <Input
                     value={password}
-                    onChange={(e) => setPassword(e.target.value)}
+                    onChange={handlePasswordChange}
                     type={showPassword ? "text" : "password"}
                     placeholder="Your password"
                     bg="gray.50"
@@ -431,11 +408,15 @@ const Login = () => {
               
               <Text textAlign="center">
                 Don't have an account?{" "}
-                <RouterLink to="/register">
-                  <Text as="span" color={highlightColor} fontWeight="medium" cursor="pointer">
-                    Register now
-                  </Text>
-                </RouterLink>
+                <Link 
+                  as={RouterLink} 
+                  to="/register" 
+                  color={highlightColor} 
+                  fontWeight="medium"
+                  _hover={{ textDecoration: "underline" }}
+                >
+                  Register now
+                </Link>
               </Text>
               
               {/* Social login options */}

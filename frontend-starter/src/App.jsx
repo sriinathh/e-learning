@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { Routes, Route, useLocation, useNavigate } from "react-router-dom";
 import { ChakraProvider, extendTheme } from "@chakra-ui/react";
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import Navbar from "./components/shared/Navbar";
 import LandingPage from "./pages/LandingPage";
 import Register from "./components/auth/Register";
@@ -14,7 +16,6 @@ import JobOpportunities from "./placement/JobOpportunities";
 import ChatbotPage from './pages/ChatbotPage'; 
 import CampusConnectPage from "./pages/CampusConnectPage";
 import CommunityPage from "./pages/CommunityPage";
-import DirectMessaging from './pages/DirectMessaging';
 import SimpleCourse from './components/SimpleCourse';
 
 import PrivateRoute from "./components/PrivateRoute"; // Ensure it's implemented correctly
@@ -74,21 +75,20 @@ const App = () => {
                     !location.pathname.includes("/udemy-course") && 
                     !location.pathname.includes("/simple-course");
 
-  // For development, you can set this to true to disable auth redirects
-  const bypassAuth = true;
-  const isLoggedIn = bypassAuth || localStorage.getItem("user");
+  // Remove bypassAuth and properly check for user authentication
+  const isLoggedIn = localStorage.getItem("token") && localStorage.getItem("user");
 
   // Apply theme to HTML document
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', appTheme);
   }, [appTheme]);
 
-  // Only redirect for login if not bypassing auth
+  // Redirect to login if not authenticated
   useEffect(() => {
-    if (!bypassAuth && !isLoggedIn && !["/", "/login", "/register"].includes(location.pathname)) {
+    if (!isLoggedIn && !["/", "/login", "/register"].includes(location.pathname)) {
       navigate("/login");
     }
-  }, [isLoggedIn, location.pathname, navigate, bypassAuth]);
+  }, [isLoggedIn, location.pathname, navigate]);
 
   const [certificates, setCertificates] = useState(() => {
     const savedCertificates = localStorage.getItem("certificates");
@@ -154,10 +154,21 @@ const App = () => {
 
             {/* Simple Course Route */}
             <Route path="/simple-course" element={<PrivateRoute><SimpleCourse /></PrivateRoute>} />
-            <Route path="/messages" element={<DirectMessaging />} />
           </Routes>
         </div>
       </div>
+      <ToastContainer 
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="light"
+      />
     </ChakraProvider>
   );
 };

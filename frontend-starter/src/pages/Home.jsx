@@ -55,16 +55,34 @@ const Home = () => {
       <section className="hero-section">
         <div className="hero-overlay"></div>
         <div className="hero-content">
-          <h1 className="fade-in">Unlock Your Potential with EduConnect</h1>
-          <p className="fade-in-delay">Explore thousands of courses, improve your skills, and transform your career!</p>
-          <div className="search-bar slide-in-bottom">
-            <input 
-              type="text" 
-              placeholder="Search for courses, skills, or instructors..." 
-              value={searchQuery} 
-              onChange={handleSearch} 
-            />
-            <button>Search</button>
+          <div className="hero-title-container">
+            <h1 className="hero-title fade-in-delay">
+              Unlock Your Potential
+              <span className="highlight"> with CampusConnect!!</span>
+            </h1>
+            <div className="hero-subtitle-container">
+              <p className="hero-subtitle fade-in-delay">
+                🚀 Explore thousands of courses
+                <span className="dot">•</span>
+                Improve your skills
+                <span className="dot">•</span>
+                Transform your career!
+              </p>
+            </div>
+          </div>
+          <div className="search-bar-container slide-in-bottom">
+            <div className="search-bar">
+              <input 
+                type="text" 
+                placeholder="Search for courses, skills, or instructors..." 
+                value={searchQuery} 
+                onChange={handleSearch} 
+              />
+              <button className="search-button">
+                <span>Search</span>
+                <span className="search-arrow">→</span>
+              </button>
+            </div>
           </div>
         </div>
       </section>
@@ -157,7 +175,7 @@ const Home = () => {
         <h2>What Our Students Say</h2>
         <div className="testimonial-cards">
           {[ 
-            { name: "John Doe", feedback: "EduConnect has been a game changer for my career. The courses are top-notch!", image: "https://res.cloudinary.com/dfeyi8eom/image/upload/v1745680829/johndoe_euwnz8.jpg" },
+            { name: "John Doe", feedback: "CampusConnect has been a game changer for my career. The courses are top-notch!", image: "https://res.cloudinary.com/dfeyi8eom/image/upload/v1745680829/johndoe_euwnz8.jpg" },
             { name: "Jane Smith", feedback: "The platform's UI is amazing and the courses are incredibly useful.", image: "https://res.cloudinary.com/dfeyi8eom/image/upload/v1745680829/janesmith_icnprz.jpg" }
           ].map((testimonial, index) => (
             <div className="testimonial-card" key={index}>
@@ -172,16 +190,16 @@ const Home = () => {
       {/* Footer */}
       <footer className="footer slide-in-bottom">
         <div className="footer-content">
-          <p>&copy; {new Date().getFullYear()} EduConnect. All rights reserved.</p>
+          <p>&copy; {new Date().getFullYear()} CampusConnect. All rights reserved.</p>
           <div className="footer-links">
             <Link to="/privacy">Privacy</Link>
             <Link to="/terms">Terms</Link>
             <Link to="/contact">Contact</Link>
           </div>
           <div className="footer-socials">
-            <a href="https://www.instagram.com/educonnect" target="_blank">Instagram</a>
-            <a href="mailto:contact@educonnect.com">Email</a>
-            <a href="https://www.linkedin.com/company/educonnect" target="_blank">LinkedIn</a>
+            <a href="https://www.instagram.com/campusconnect" target="_blank">Instagram</a>
+            <a href="mailto:contact@campusconnect.com">Email</a>
+            <a href="https://www.linkedin.com/company/campusconnect" target="_blank">LinkedIn</a>
           </div>
         </div>
       </footer>

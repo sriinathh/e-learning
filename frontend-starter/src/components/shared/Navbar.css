@@ -166,6 +166,20 @@
   position: relative;
 }
 
+.user-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  border-radius: 20px;
+}
+
+.user-name {
+  font-size: 0.9rem;
+  color: white;
+  margin-left: 4px;
+}
+
 .dropdown-menu {
   position: absolute;
   top: calc(100% + 10px);
@@ -179,15 +193,23 @@
   z-index: 100;
 }
 
-@keyframes dropdown {
-  from {
-    opacity: 0;
-    transform: translateY(-10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+.dropdown-header {
+  display: flex;
+  align-items: center;
+  padding: 1rem;
+  background-color: #f7fafc;
+  border-bottom: 1px solid #edf2f7;
+  gap: 8px;
+}
+
+.dropdown-header svg {
+  font-size: 1.2rem;
+  color: #4a5568;
+}
+
+.dropdown-header span {
+  font-weight: 600;
+  color: #2d3748;
 }
 
 .dropdown-item {
@@ -347,6 +369,14 @@
   
   .courses-toggle {
     width: 100%;
+  }
+
+  .user-name {
+    display: none;
+  }
+  
+  .user-btn {
+    padding: 6px;
   }
 }
 

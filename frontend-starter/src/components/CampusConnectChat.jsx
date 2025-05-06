@@ -16,9 +16,25 @@ import {
   Container,
   Badge,
   useColorModeValue,
-  Heading
+  Heading,
+  Select,
+  FormControl,
+  FormLabel,
+  Modal,
+  ModalOverlay,
+  ModalContent,
+  ModalHeader,
+  ModalFooter,
+  ModalBody,
+  ModalCloseButton,
+  useDisclosure,
+  Slider,
+  SliderTrack,
+  SliderFilledTrack,
+  SliderThumb,
+  Tooltip
 } from '@chakra-ui/react';
-import { FiSend, FiUser, FiCpu, FiTrash2, FiChevronRight } from 'react-icons/fi';
+import { FiSend, FiUser, FiCpu, FiTrash2, FiChevronRight, FiSettings, FiSave } from 'react-icons/fi';
 import axios from 'axios';
 
 const CampusConnectChat = () => {
@@ -34,6 +50,14 @@ const CampusConnectChat = () => {
     { id: 'default', title: 'New Conversation', messages: [] }
   ]);
   const [activeConversation, setActiveConversation] = useState('default');
+  const [availableModels, setAvailableModels] = useState([]);
+  const [selectedModel, setSelectedModel] = useState('');
+  const [temperature, setTemperature] = useState(0.7);
+  const [maxTokens, setMaxTokens] = useState(1024);
+  const [customInstructions, setCustomInstructions] = useState('');
+  const [showTemperatureTooltip, setShowTemperatureTooltip] = useState(false);
+  
+  const { isOpen, onOpen, onClose } = useDisclosure();
   const endOfMessagesRef = useRef(null);
   const toast = useToast();
   
@@ -44,10 +68,30 @@ const CampusConnectChat = () => {
   const userBubbleBg = useColorModeValue('blue.500', 'blue.400');
   const aiBubbleBg = useColorModeValue('gray.100', 'gray.700');
 
+  // Fetch available models on component mount
+  useEffect(() => {
+    fetchAvailableModels();
+  }, []);
+
   // Scroll to bottom of chat when messages update
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  // Fetch available models from the backend
+  const fetchAvailableModels = async () => {
+    try {
+      const response = await axios.get('http://localhost:5001/api/chat/models');
+      if (response.data.success) {
+        setAvailableModels(response.data.models);
+        setSelectedModel(response.data.defaultModel);
+      }
+    } catch (error) {
+      console.error('Error fetching models:', error);
+      // If we can't fetch models, set a default
+      setSelectedModel('mistral-small-latest');
+    }
+  };
 
   const scrollToBottom = () => {
     endOfMessagesRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -65,16 +109,37 @@ const CampusConnectChat = () => {
     setIsLoading(true);
 
     try {
-      // Send to backend API
-      const response = await axios.post('http://localhost:5000/api/chat/campusconnect', {
-        messages: [...messages, userMessage]
+      // Send to backend API with model parameters
+      const response = await axios.post('http://localhost:5001/api/chat/campusconnect', {
+        messages: [...messages, userMessage],
+        model: selectedModel,
+        temperature: temperature,
+        maxTokens: maxTokens,
+        customInstructions: customInstructions
       });
 
-      // Add AI response to chat
-      setMessages(prev => [...prev, { 
-        role: 'assistant', 
-        content: response.data.message 
-      }]);
+      if (response.data.success) {
+        // Add AI response to chat
+        setMessages(prev => [...prev, { 
+          role: 'assistant', 
+          content: response.data.message 
+        }]);
+
+        // Update conversation title if it's a new conversation
+        if (conversations.find(c => c.id === activeConversation).messages.length === 0) {
+          // Extract first 30 chars of first user message as conversation title
+          const newTitle = userMessage.content.substring(0, 30) + (userMessage.content.length > 30 ? '...' : '');
+          updateConversationTitle(activeConversation, newTitle);
+        }
+
+        // Save messages to the current conversation
+        updateConversationMessages(activeConversation, [...messages, userMessage, { 
+          role: 'assistant', 
+          content: response.data.message 
+        }]);
+      } else {
+        throw new Error(response.data.message || "Error from AI service");
+      }
     } catch (error) {
       console.error('Error sending message:', error);
       
@@ -101,6 +166,10 @@ const CampusConnectChat = () => {
           "1. Creating an account at https://console.mistral.ai/\n" +
           "2. Generating an API key\n" +
           "3. Adding it to the .env file in the backend";
+      } else if (error.response?.status === 429) {
+        assistantErrorMessage = 
+          "Error: The AI service is experiencing high demand. Please try again in a moment.\n\n" +
+          "This is a rate limit error from the Mistral API.";
       }
       
       setMessages(prev => [...prev, { 
@@ -130,6 +199,55 @@ const CampusConnectChat = () => {
       role: 'assistant',
       content: 'Hello! I am CampusConnect, your educational assistant. How can I help you today?'
     }]);
+    
+    // Also clear the messages in the active conversation
+    updateConversationMessages(activeConversation, [{
+      role: 'assistant',
+      content: 'Hello! I am CampusConnect, your educational assistant. How can I help you today?'
+    }]);
+  };
+
+  const updateConversationTitle = (id, title) => {
+    setConversations(prev => 
+      prev.map(conv => 
+        conv.id === id ? { ...conv, title } : conv
+      )
+    );
+  };
+
+  const updateConversationMessages = (id, messages) => {
+    setConversations(prev => 
+      prev.map(conv => 
+        conv.id === id ? { ...conv, messages } : conv
+      )
+    );
+  };
+
+  const loadConversation = (id) => {
+    const conversation = conversations.find(conv => conv.id === id);
+    if (conversation) {
+      setActiveConversation(id);
+      // If the conversation has messages, load them
+      if (conversation.messages.length > 0) {
+        setMessages(conversation.messages);
+      } else {
+        // Otherwise, start with a welcome message
+        setMessages([{
+          role: 'assistant',
+          content: 'Hello! I am CampusConnect, your educational assistant. How can I help you today?'
+        }]);
+      }
+    }
+  };
+
+  const saveSettings = () => {
+    toast({
+      title: 'Settings Saved',
+      description: `Model: ${selectedModel}, Temperature: ${temperature}`,
+      status: 'success',
+      duration: 2000,
+    });
+    onClose();
   };
 
   return (
@@ -160,6 +278,17 @@ const CampusConnectChat = () => {
             New Conversation
           </Button>
           
+          <Button
+            variant="outline"
+            leftIcon={<FiSettings />}
+            justifyContent="flex-start"
+            mb={2}
+            onClick={onOpen}
+            size="sm"
+          >
+            AI Settings
+          </Button>
+          
           <Divider mb={2} />
           
           <Text fontSize="sm" fontWeight="bold" color="gray.500" mb={1}>Recent conversations</Text>
@@ -171,7 +300,7 @@ const CampusConnectChat = () => {
               justifyContent="flex-start"
               leftIcon={<FiChevronRight />}
               size="sm"
-              onClick={() => setActiveConversation(conv.id)}
+              onClick={() => loadConversation(conv.id)}
               isTruncated
             >
               {conv.title}
@@ -209,12 +338,22 @@ const CampusConnectChat = () => {
             </Box>
           </Flex>
           
-          <IconButton
-            icon={<FiTrash2 />}
-            variant="ghost"
-            aria-label="Clear chat"
-            onClick={clearChat}
-          />
+          <Flex>
+            <IconButton
+              icon={<FiSettings />}
+              variant="ghost"
+              aria-label="AI Settings"
+              onClick={onOpen}
+              mr={2}
+              display={{ base: 'flex', md: 'none' }}
+            />
+            <IconButton
+              icon={<FiTrash2 />}
+              variant="ghost"
+              aria-label="Clear chat"
+              onClick={clearChat}
+            />
+          </Flex>
         </Flex>
 
         {/* Messages area */}
@@ -315,6 +454,100 @@ const CampusConnectChat = () => {
           </form>
         </Box>
       </Flex>
+
+      {/* Settings Modal */}
+      <Modal isOpen={isOpen} onClose={onClose}>
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>AI Assistant Settings</ModalHeader>
+          <ModalCloseButton />
+          <ModalBody>
+            <VStack spacing={4} align="stretch">
+              <FormControl>
+                <FormLabel>AI Model</FormLabel>
+                <Select 
+                  value={selectedModel}
+                  onChange={(e) => setSelectedModel(e.target.value)}
+                >
+                  {availableModels.map(model => (
+                    <option key={model.id} value={model.id}>
+                      {model.name}
+                    </option>
+                  ))}
+                </Select>
+              </FormControl>
+              
+              <FormControl>
+                <FormLabel>Temperature: {temperature.toFixed(1)}</FormLabel>
+                <Slider
+                  min={0}
+                  max={1}
+                  step={0.1}
+                  value={temperature}
+                  onChange={setTemperature}
+                  onMouseEnter={() => setShowTemperatureTooltip(true)}
+                  onMouseLeave={() => setShowTemperatureTooltip(false)}
+                >
+                  <SliderTrack>
+                    <SliderFilledTrack />
+                  </SliderTrack>
+                  <Tooltip
+                    hasArrow
+                    bg='teal.500'
+                    color='white'
+                    placement='top'
+                    isOpen={showTemperatureTooltip}
+                    label={`${temperature.toFixed(1)}: ${temperature < 0.4 ? 'More deterministic' : temperature > 0.7 ? 'More creative' : 'Balanced'}`}
+                  >
+                    <SliderThumb />
+                  </Tooltip>
+                </Slider>
+                <Text fontSize="xs" color="gray.500">
+                  Lower values (0.0-0.3): More deterministic, factual responses
+                  <br />
+                  Higher values (0.7-1.0): More creative, varied responses
+                </Text>
+              </FormControl>
+              
+              <FormControl>
+                <FormLabel>Max Response Length</FormLabel>
+                <Select
+                  value={maxTokens}
+                  onChange={(e) => setMaxTokens(Number(e.target.value))}
+                >
+                  <option value={256}>Short (256 tokens)</option>
+                  <option value={512}>Medium (512 tokens)</option>
+                  <option value={1024}>Standard (1024 tokens)</option>
+                  <option value={2048}>Long (2048 tokens)</option>
+                </Select>
+              </FormControl>
+              
+              <FormControl>
+                <FormLabel>Custom Instructions (Optional)</FormLabel>
+                <Textarea
+                  placeholder="Add custom instructions for the AI..."
+                  value={customInstructions}
+                  onChange={(e) => setCustomInstructions(e.target.value)}
+                  size="sm"
+                  rows={3}
+                />
+                <Text fontSize="xs" color="gray.500" mt={1}>
+                  These will be added to the system prompt to tailor the AI's behavior
+                </Text>
+              </FormControl>
+            </VStack>
+          </ModalBody>
+
+          <ModalFooter>
+            <Button mr={3} onClick={onClose}>
+              Cancel
+            </Button>
+            <Button colorScheme="teal" leftIcon={<FiSave />} onClick={saveSettings}>
+              Save Settings
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
     </Flex>
   );
 };

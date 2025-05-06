@@ -30,6 +30,7 @@ import { motion } from "framer-motion";
 import { Link as RouterLink, useNavigate } from "react-router-dom";
 import { FaEye, FaEyeSlash, FaUserPlus, FaGoogle, FaUniversity, FaEnvelope, FaLock, FaUserAlt } from 'react-icons/fa';
 import axios from "axios";
+import { toast } from 'react-toastify';
 
 // Create motion components
 const MotionBox = motion(Box);
@@ -196,64 +197,28 @@ const Register = () => {
     setLoading(true);
 
     try {
-      // For demo, we'll store the user in localStorage
-      const userData = {
-        firstName,
-        lastName,
-        username,
+      const response = await axios.post('http://localhost:5001/api/auth/register', {
+        name: firstName + ' ' + lastName,
         email,
-        _id: 'user-' + Date.now(),
-        joinedAt: new Date().toISOString(),
-        profilePic: `https://ui-avatars.com/api/?name=${encodeURIComponent(firstName + ' ' + lastName)}&background=random`,
-        isOnline: true
-      };
-      
-      localStorage.setItem('user', JSON.stringify(userData));
-      
-      // Initialize community users
-      try {
-        let communityUsers = [];
-        const storedUsers = localStorage.getItem('communityUsers');
+        password,
+      });
+
+      if (response.data.success) {
+        // Save token to localStorage
+        localStorage.setItem('token', response.data.token);
+        localStorage.setItem('user', JSON.stringify(response.data.user));
         
-        if (storedUsers) {
-          communityUsers = JSON.parse(storedUsers);
-        }
+        // Show success message
+        toast.success('Registration successful!');
         
-        // Add current user to community
-        communityUsers.push({
-          _id: userData._id,
-          username: userData.username,
-          isOnline: true,
-          profilePic: userData.profilePic,
-          isReal: true,
-          joinedAt: userData.joinedAt
-        });
-        
-        // Store updated community users
-        localStorage.setItem('communityUsers', JSON.stringify(communityUsers));
-      } catch (error) {
-        console.error('Error initializing community users:', error);
+        // Redirect to dashboard
+        navigate('/dashboard');
       }
-      
-      setLoading(false);
-      toast({
-        title: "Registration successful!",
-        description: "Welcome to Campus Connect. You can now log in.",
-        status: "success",
-        duration: 3000,
-        isClosable: true,
-      });
-      navigate("/login");
     } catch (error) {
-      console.error("Registration Error:", error);
+      console.error('Registration error:', error);
+      toast.error(error.response?.data?.message || 'Registration failed. Please try again.');
+    } finally {
       setLoading(false);
-      toast({
-        title: "Error",
-        description: error.response?.data?.message || error.message || "An error occurred",
-        status: "error",
-        duration: 5000,
-        isClosable: true,
-      });
     }
   };
 
@@ -474,7 +439,7 @@ const Register = () => {
                         value={firstName}
                         onChange={(e) => setFirstName(e.target.value)}
                         type="text"
-                        placeholder="e.g. John"
+                        placeholder="e.g. Srinath"
                         bg="gray.50"
                         borderColor="gray.300"
                         _hover={{ borderColor: "teal.300" }}
@@ -490,7 +455,7 @@ const Register = () => {
                         value={lastName}
                         onChange={(e) => setLastName(e.target.value)}
                         type="text"
-                        placeholder="e.g. Doe"
+                        placeholder="e.g. Reddy"
                         bg="gray.50"
                         borderColor="gray.300"
                         _hover={{ borderColor: "teal.300" }}
@@ -506,7 +471,7 @@ const Register = () => {
                         value={username}
                         onChange={(e) => setUsername(e.target.value)}
                         type="text"
-                        placeholder="e.g. johndoe123"
+                        placeholder="e.g. srinath"
                         bg="gray.50"
                         borderColor="gray.300"
                         _hover={{ borderColor: "teal.300" }}
@@ -529,7 +494,7 @@ const Register = () => {
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         type="email"
-                        placeholder="e.g. john.doe@example.com"
+                        placeholder="e.g. srinath@example.com"
                         bg="gray.50"
                         borderColor="gray.300"
                         _hover={{ borderColor: "teal.300" }}
@@ -689,7 +654,13 @@ const Register = () => {
             
             <Text textAlign="center">
               Already have an account?{" "}
-              <Link as={RouterLink} to="/login" color={highlightColor} fontWeight="medium">
+              <Link 
+                as={RouterLink} 
+                to="/login" 
+                color={highlightColor} 
+                fontWeight="medium"
+                _hover={{ textDecoration: "underline" }}
+              >
                 Sign in
               </Link>
             </Text>

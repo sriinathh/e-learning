@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { FaBars, FaTimes, FaUserCircle, FaBell, FaGraduationCap, FaCog, FaSignOutAlt, FaChevronDown, FaUsers, FaEnvelope } from 'react-icons/fa';
+import { FaBars, FaTimes, FaUserCircle, FaBell, FaGraduationCap, FaCog, FaSignOutAlt, FaChevronDown, FaUsers, FaEnvelope, FaComments } from 'react-icons/fa';
+import { useSocket } from '../../context/SocketContext';
 import './Navbar.css';
 
 const Navbar = () => {
@@ -8,7 +9,18 @@ const Navbar = () => {
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [coursesMenuOpen, setCoursesMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [userName, setUserName] = useState('');
   const location = useLocation();
+  const { socket } = useSocket();
+
+  // Get user name on component mount
+  useEffect(() => {
+    const user = JSON.parse(localStorage.getItem('user'));
+    if (user) {
+      setUserName(user.name || user.username || user.email.split('@')[0]);
+    }
+  }, []);
 
   // Handle scroll effect
   useEffect(() => {
@@ -23,6 +35,38 @@ const Navbar = () => {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  // Listen for unread messages
+  useEffect(() => {
+    if (!socket) return;
+
+    const handleUnreadMessages = (counts) => {
+      const totalUnread = counts.reduce((total, item) => total + item.count, 0);
+      setUnreadCount(totalUnread);
+    };
+
+    socket.on('unreadMessages', handleUnreadMessages);
+
+    // Also update unread count when receiving new message
+    socket.on('newDirectMessage', (message) => {
+      // Only increment if message is not from current user
+      if (!message.isCurrentUser) {
+        setUnreadCount(prev => prev + 1);
+      }
+    });
+
+    return () => {
+      socket.off('unreadMessages');
+      socket.off('newDirectMessage');
+    };
+  }, [socket]);
+
+  // Reset unread count when visiting messages page
+  useEffect(() => {
+    if (location.pathname === '/messages') {
+      setUnreadCount(0);
+    }
+  }, [location.pathname]);
 
   // Close mobile menu when route changes
   useEffect(() => {
@@ -49,6 +93,7 @@ const Navbar = () => {
 
   const handleLogout = () => {
     localStorage.removeItem('user');
+    localStorage.removeItem('token');
     window.location.href = '/login';
   };
 
@@ -99,17 +144,19 @@ const Navbar = () => {
               <FaUsers className="icon-left" /> Community
             </Link>
           </li>
-          <li className={`navbar-item ${isActive('/messages')}`}>
-            <Link to="/messages" className="navbar-link">
-              <FaEnvelope className="icon-left" /> Messages
-            </Link>
-          </li>
           <li className={`navbar-item ${isActive('/campusconnect')}`}>
             <Link to="/campusconnect" className="navbar-link special">CampusAI</Link>
           </li>
         </ul>
 
         <div className="navbar-actions">
+          <Link to="/messages" className="action-btn notification-btn messages-btn">
+            <FaComments />
+            {unreadCount > 0 && (
+              <span className="notification-badge">{unreadCount > 9 ? '9+' : unreadCount}</span>
+            )}
+          </Link>
+          
           <button className="action-btn notification-btn">
             <FaBell />
             <span className="notification-badge">3</span>
@@ -118,10 +165,15 @@ const Navbar = () => {
           <div className="user-menu">
             <button className="action-btn user-btn" onClick={toggleUserMenu}>
               <FaUserCircle />
+              <span className="user-name">{userName}</span>
             </button>
             
             {userMenuOpen && (
               <div className="dropdown-menu">
+                <div className="dropdown-header">
+                  <FaUserCircle />
+                  <span>{userName}</span>
+                </div>
                 <Link to="/profile" className="dropdown-item">
                   <FaUserCircle /> Profile
                 </Link>
