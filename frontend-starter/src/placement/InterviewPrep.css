@@ -1,0 +1,62 @@
+/* /src/components/InterviewPrep.css */
+.section {
+    padding: 20px;
+    background-color: #f4f4f9;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    margin-top: 20px;
+  }
+  
+  h2 {
+    color: #333;
+  }
+  
+  .start-button,
+  .submit-button {
+    padding: 10px 20px;
+    font-size: 16px;
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+  }
+  
+  .start-button:hover,
+  .submit-button:hover {
+    background-color: #0056b3;
+  }
+  
+  .question-container {
+    margin-bottom: 20px;
+  }
+  
+  .timer {
+    font-size: 18px;
+    font-weight: bold;
+    color: #ff3333;
+  }
+  
+  textarea {
+    width: 100%;
+    padding: 10px;
+    margin-top: 10px;
+    font-size: 16px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    resize: none;
+  }
+  
+  textarea:focus {
+    border-color: #007bff;
+    outline: none;
+  }
+  
+  .feedback {
+    margin-top: 20px;
+    font-size: 18px;
+    font-weight: bold;
+    color: #28a745;
+  }
+  

@@ -1,0 +1,11 @@
+IMPORTANT: Create a .env file in the backend directory with the following content:
+
+MISTRAL_API_KEY=your_actual_mistral_api_key_here
+JWT_SECRET=campusconnect_secure_jwt_secret
+NODE_ENV=development
+MONGO_URI=mongodb://localhost:27017/campusconnect
+
+Replace "your_actual_mistral_api_key_here" with your real Mistral API key.
+You can get a Mistral API key by signing up at https://console.mistral.ai/
+
+After creating this file, restart your backend server. 

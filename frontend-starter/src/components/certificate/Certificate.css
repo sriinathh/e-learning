@@ -1,0 +1,163 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
+
+* {
+  box-sizing: border-box;
+}
+
+.certificate-container {
+  background: #fff;
+  border-radius: 20px;
+  padding: 50px;
+  width: 900px;
+  max-width: 100%;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  border-left: 10px solid #a435f0;
+  position: relative;
+  margin: 40px auto;
+  font-family: 'Poppins', sans-serif;
+}
+
+.logo {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.logo img {
+  height: 100px;
+}
+
+.certificate-title {
+  text-align: center;
+  font-size: 36px;
+  font-weight: 700;
+  margin: 40px 0 10px;
+  color: #a435f0;
+}
+
+.subtitle {
+  text-align: center;
+  font-size: 18px;
+  color: #666;
+  margin-bottom: 30px;
+}
+
+.recipient {
+  text-align: center;
+  font-size: 26px;
+  font-weight: 600;
+  margin: 20px 0 10px;
+  color: #111;
+}
+
+.text {
+  text-align: center;
+  font-size: 18px;
+  color: #444;
+  line-height: 1.6;
+}
+
+.highlight {
+  font-weight: 600;
+  color: #222;
+}
+
+.details {
+  text-align: center;
+  margin-top: 30px;
+  font-size: 16px;
+  color: #555;
+}
+
+.signatures {
+  display: flex;
+  justify-content: space-around;
+  gap: 80px;
+  align-items: flex-end;
+  margin-top: 40px;
+}
+
+.sign-box {
+  text-align: center;
+  width: 200px;
+}
+
+.sign-line {
+  width: 100%;
+  height: 1px;
+  background-color: #000;
+  margin-bottom: 10px;
+}
+
+.sign-name {
+  font-weight: bold;
+  font-size: 16px;
+}
+
+.sign-role {
+  font-size: 14px;
+  color: #666;
+}
+
+.badge {
+  position: absolute;
+  top: 30px;
+  right: 30px;
+  background: #a435f0;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 30px;
+  font-size: 14px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.signature-img {
+  width: 120px;
+  height: auto;
+  margin-bottom: 5px;
+  object-fit: contain;
+}
+
+@media print {
+  body {
+    background: none;
+  }
+  
+  .certificate-container {
+    box-shadow: none;
+    border: none;
+    width: 100%;
+    height: auto;
+    padding: 20px;
+    margin: 0;
+  }
+  
+  .logo img {
+    max-width: 200px;
+  }
+  
+  .signatures {
+    display: flex !important;
+    page-break-inside: avoid;
+    justify-content: space-around;
+  }
+  
+  .sign-box {
+    display: flex !important;
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .signature-img {
+    display: block !important;
+    visibility: visible !important;
+    width: 120px !important;
+    height: auto !important;
+  }
+  
+  .badge {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+} 

@@ -1,0 +1,31 @@
+MISTRAL API SETUP INSTRUCTIONS
+===========================
+
+To fix the "Could not connect to AI service" or "AI is not working" errors, follow these steps:
+
+1. Create a file named '.env' in the backend directory (or edit if it exists)
+
+2. Add your Mistral API key to the file:
+   MISTRAL_API_KEY=your_actual_api_key_here
+   
+   - Get your API key from https://console.mistral.ai/
+   - Replace "your_actual_api_key_here" with the key you received
+
+3. Make sure the backend server is running:
+   - In PowerShell, navigate to the backend directory: 
+     cd backend
+   - Run the server:
+     node server.js
+   
+4. In a different PowerShell window, start the frontend:
+   - Navigate to the frontend directory:
+     cd frontend-starter
+   - Run the development server:
+     npm run dev
+
+5. If you're still experiencing issues, check:
+   - If the API key is valid and correctly formatted
+   - If there are any errors in the backend console output
+   - Your network connectivity to the Mistral API servers
+
+IMPORTANT: Don't share your API key with anyone. It provides access to your Mistral account and may incur usage charges. 
