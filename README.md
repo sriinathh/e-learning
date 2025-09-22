@@ -1,4 +1,6 @@
 # Campus Connect E-Learning Platform
+<img width="1904" height="842" alt="image" src="https://github.com/user-attachments/assets/a560eacd-165b-4cd5-b590-b0336ebdc712" />
+
 
 A comprehensive e-learning platform built with React, Node.js, and MongoDB that provides a seamless learning experience with modern UI and extensive features.
 
